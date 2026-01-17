@@ -36,6 +36,56 @@
       padding: 14px 16px;
     }
     .topbar{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between; /* 👈 clé du problème */
+  gap:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logoDot{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  background:#fff;
+  border:2px solid #5D4037;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.logoDot img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.brandText{
+  display:flex;
+  flex-direction:column;
+  line-height:1;
+}
+
+.brandName{
+  font-size:22px;
+  font-weight:1000;
+  color:#5D4037;
+}
+
+.brandTag{
+  font-size:14px;
+  font-weight:900;
+  color:#2E7D32;
+}
+
+    .topbar{
       max-width:1100px; margin:auto;
       display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
@@ -663,6 +713,7 @@
 
 </body>
 </html>
+
 
 
 
