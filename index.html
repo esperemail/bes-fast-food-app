@@ -29,7 +29,7 @@
         var(--bg);
     }
 
-    /* ===== HEADER CLEAN ===== */
+    /* ===== HEADER ===== */
     header{
       position:sticky; top:0; z-index:50;
       background: linear-gradient(90deg, var(--y), var(--o));
@@ -51,42 +51,46 @@
       min-width:0;
     }
     .logoWrap{
-      width:56px;
-      height:56px;
+      width:56px; height:56px;
       border-radius:16px;
-      background: rgba(255,255,255,.75);
+      background: rgba(255,255,255,.80);
       border:2px solid rgba(93,64,55,.28);
       box-shadow: 0 10px 22px rgba(93,64,55,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       overflow:hidden;
       flex:0 0 auto;
     }
     .logoWrap img{
-      width:100%;
-      height:100%;
+      width:100%; height:100%;
       object-fit:contain;
       display:block;
     }
+
+    /* ✅ B E S même largeur que Fast Food */
     .brandText{
       display:flex;
       flex-direction:column;
       line-height:1.05;
-      min-width:0;
+      width: 120px;           /* <- même largeur pour les 2 lignes */
+      min-width:120px;
     }
     .brandName{
       font-size:22px;
       font-weight:1000;
-      letter-spacing:.6px;
+      letter-spacing: 8px;    /* espace B E S */
       color:#2b1b16;
+      text-align:left;
+      white-space:nowrap;
     }
     .brandTag{
       margin-top:4px;
       font-size:13px;
       font-weight:1000;
       color: rgba(46,125,50,.95);
+      text-align:left;
+      white-space:nowrap;
     }
+
     .pill{
       font-size:12px;
       font-weight:1000;
@@ -99,7 +103,8 @@
       box-shadow: 0 10px 20px rgba(93,64,55,.12);
     }
     @media (max-width:520px){
-      .brandName{font-size:18px}
+      .brandText{width:108px;min-width:108px}
+      .brandName{font-size:18px; letter-spacing:6px}
       .brandTag{font-size:12px}
       .pill{padding:9px 12px}
       .logoWrap{width:50px;height:50px}
@@ -190,6 +195,7 @@
       font-weight:1000; color:#2b1b16;
     }
     .badge.green{border-color:rgba(46,125,50,.25); color:rgba(46,125,50,.95)}
+    .badge.pink{border-color:rgba(211,47,47,.20); color:rgba(211,47,47,.90)}
 
     .btn{
       width:100%;
@@ -276,10 +282,10 @@
   <div class="topbar">
     <div class="brand">
       <div class="logoWrap">
-        <img src="logo.jpg" alt="BES Fast Food">
+        <img src="./logo.jpg" alt="BES Fast Food">
       </div>
       <div class="brandText">
-        <div class="brandName">BES</div>
+        <div class="brandName">B E S</div>
         <div class="brandTag">Fast Food</div>
       </div>
     </div>
@@ -298,7 +304,7 @@
         <div class="row">
           <div>
             <div style="font-weight:1000;font-size:18px">Menu</div>
-            <div class="muted">Produits affichés uniquement si <b>Stock &gt; 0</b></div>
+            <div class="muted">Choisis tes produits et envoie la commande ✅</div>
           </div>
           <div style="max-width:260px; width:100%">
             <select id="catFilter"></select>
@@ -391,6 +397,19 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
 
   /*********************
+   * PRODUITS (STATIC)
+   * Remplace Image par tes liens (ou laisse "")
+   *********************/
+  const STATIC_PRODUCTS = [
+    { ProductID:"1", Nom:"Cornet (Pack de 6)", Prix:1250, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"2", Nom:"Gratiné simple",      Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"3", Nom:"Gratiné wings",       Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"4", Nom:"Wings simple",        Prix:750,  Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"5", Nom:"Cupcake (Pack de 6)", Prix:1500, Description:"", Categorie:"Dessert",    Image:"" },
+    { ProductID:"6", Nom:"Brownies (Pack de 6)",Prix:1500, Description:"", Categorie:"Dessert",    Image:"" }
+  ];
+
+  /*********************
    * HELPERS
    *********************/
   const $ = (id)=>document.getElementById(id);
@@ -406,6 +425,7 @@
     e.textContent="";
   }
   function money(x){ return Number(x||0).toFixed(2); }
+  function norm(s){ return String(s||"").toLowerCase().trim(); }
 
   // JSONP API
   function api(action, params = {}) {
@@ -445,6 +465,14 @@
     return id;
   }
 
+  function safeImgUrl(u){
+    const url = String(u||"").trim();
+    if(!url) return "";
+    if(/^https?:\/\//i.test(url)) return url;   // liens web
+    if(url.startsWith("./") || url.startsWith("assets/")) return url; // si tu veux local plus tard
+    return "";
+  }
+
   const state = {
     guestId: null,
     orderId: null,
@@ -461,15 +489,6 @@
     }
   }
 
-  function norm(s){ return String(s||"").toLowerCase().trim(); }
-
-  function safeImgUrl(u){
-    const url = String(u||"").trim();
-    if(!url) return "";
-    if(!/^https?:\/\//i.test(url)) return "";
-    return url;
-  }
-
   function syncAddressVisibility(){
     const t = norm($("typeCommande").value);
     const isLiv = (t === "livraison");
@@ -478,15 +497,11 @@
   }
 
   /*********************
-   * PRODUCTS
+   * PRODUCTS (STATIC)
    *********************/
   async function loadProducts(){
-    const box = $("products");
-    box.innerHTML = `<div class="loading">Chargement du menu...</div>`;
-
-    const r = await api("getProducts");
-    if(!r.ok) throw new Error(r.error || "Impossible de charger les produits");
-    state.products = r.products || [];
+    // 🔥 plus d'appel Google ici
+    state.products = STATIC_PRODUCTS;
 
     const cats = Array.from(new Set(state.products.map(p=>p.Categorie).filter(Boolean)));
     $("catFilter").innerHTML =
@@ -501,6 +516,7 @@
   function renderProducts(){
     const cat = $("catFilter").value;
     const q = norm($("search").value);
+
     const list = state.products.filter(p => {
       const okCat = (!cat || String(p.Categorie) === String(cat));
       const hay = norm(p.Nom) + " " + norm(p.Description) + " " + norm(p.Categorie);
@@ -521,6 +537,8 @@
               onerror="this.remove(); this.parentNode.textContent='BES';">`
         : `BES`;
 
+      const badgeClass = (p.Categorie === "Dessert") ? "badge pink" : "badge green";
+
       return `
         <div class="prod">
           <div class="prodTop">
@@ -533,12 +551,13 @@
                 </div>
                 <div class="price">${money(p.Prix)}</div>
               </div>
+
               <div class="badges">
-                <span class="badge green">${p.Categorie||""}</span>
-                <span class="badge">Stock: ${Number(p.Stock||0)}</span>
+                <span class="${badgeClass}">${p.Categorie||""}</span>
               </div>
             </div>
           </div>
+
           <div style="margin-top:10px">
             <button class="btn btnAdd" type="button"
               onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">
@@ -670,7 +689,7 @@
       state.lastCartTotal = 0;
 
       await refreshCart(true);
-      await loadProducts();
+      // pas besoin de recharger produits (static)
     }catch(e){
       showErr(e.message || e);
     }
