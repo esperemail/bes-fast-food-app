@@ -1,2 +1,138 @@
-const API_BASE = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Bes Fast Food - Commande</title>
+  <!-- Tu peux reprendre ton CSS redesign ici (celui que je t’ai donné) -->
+</head>
+<body>
+
+<div id="app">Chargement...</div>
+
+<script>
+  // ✅ Mets ici ton URL Apps Script /exec
+  const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
+
+  // --- JSONP helper ---
+  function api(action, params = {}) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(16).slice(2);
+      const q = new URLSearchParams({ action, callback: cb, ...params }).toString();
+      const url = API_URL + "?" + q;
+
+      const s = document.createElement("script");
+      s.src = url;
+      s.async = true;
+
+      window[cb] = (data) => {
+        try { resolve(data); }
+        finally {
+          delete window[cb];
+          s.remove();
+        }
+      };
+
+      s.onerror = () => {
+        delete window[cb];
+        s.remove();
+        reject(new Error("API error / network"));
+      };
+
+      document.head.appendChild(s);
+    });
+  }
+
+  // --- local guest ---
+  function getGuestId(){
+    let id = localStorage.getItem("guestId");
+    if(!id){
+      id = "guest-" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)));
+      localStorage.setItem("guestId", id);
+    }
+    return id;
+  }
+
+  // --- Demo minimal (je peux intégrer ton UI redesign complète ensuite) ---
+  (async function boot(){
+    const guestId = getGuestId();
+
+    // Create/get draft order
+    const d = await api("createOrGetDraftOrder", { guestId });
+    if(!d.ok) return document.getElementById("app").textContent = d.error || "Erreur draft";
+    const orderId = d.orderId;
+
+    // Get products
+    const p = await api("getProducts");
+    if(!p.ok) return document.getElementById("app").textContent = p.error || "Erreur produits";
+
+    // Quick render
+    const box = document.getElementById("app");
+    box.innerHTML = `
+      <h2>Bes Fast Food</h2>
+      <p>OrderID: <b>${orderId}</b></p>
+      <h3>Produits</h3>
+      <div id="list"></div>
+      <hr>
+      <h3>Checkout (test)</h3>
+      <div>
+        <input id="nom" placeholder="Nom"><br><br>
+        <input id="tel" placeholder="Téléphone"><br><br>
+        <select id="type">
+          <option>Sur place</option>
+          <option>À emporter</option>
+          <option>Livraison</option>
+        </select><br><br>
+        <textarea id="addr" placeholder="Adresse (obligatoire si livraison)"></textarea><br><br>
+        <button id="send">Envoyer commande</button>
+        <div id="msg"></div>
+      </div>
+    `;
+
+    const list = document.getElementById("list");
+    list.innerHTML = (p.products || []).map(x => `
+      <div style="margin:8px 0;padding:10px;border:1px solid #ddd;border-radius:10px">
+        <b>${x.Nom}</b> — ${x.Prix}
+        <button data-id="${x.ProductID}" style="margin-left:10px">Ajouter</button>
+      </div>
+    `).join("");
+
+    list.querySelectorAll("button[data-id]").forEach(btn=>{
+      btn.onclick = async () => {
+        const r = await api("addItem", { orderId, productId: btn.dataset.id, qty: 1 });
+        alert(r.ok ? "Ajouté ✅" : (r.error || "Erreur"));
+      };
+    });
+
+    document.getElementById("send").onclick = async () => {
+      const type = document.getElementById("type").value;
+      const adresse = document.getElementById("addr").value.trim();
+
+      // ✅ règle: adresse obligatoire si livraison
+      if(type.toLowerCase()==="livraison" && !adresse){
+        document.getElementById("msg").textContent = "Adresse obligatoire pour la livraison.";
+        return;
+      }
+
+      const payload = {
+        orderId,
+        clientNom: document.getElementById("nom").value.trim(),
+        telephone: document.getElementById("tel").value.trim(),
+        typeCommande: type,
+        adresse,
+        noteCommande: ""
+      };
+
+      const r = await api("checkout", payload);
+      document.getElementById("msg").textContent = r.ok ? ("Envoyé ✅ Total: " + r.total) : (r.error || "Erreur");
+    };
+
+  })().catch(err=>{
+    document.getElementById("app").textContent = err.message || String(err);
+  });
+</script>
+
+</body>
+</html>
+
 
