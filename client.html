@@ -1,0 +1,573 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Bes Fast Food - Commande</title>
+
+  <style>
+    :root{
+      --y:#FFC107;       /* jaune */
+      --o:#FF9800;       /* orange */
+      --r:#D32F2F;       /* rouge */
+      --g:#2E7D32;       /* vert */
+      --b:#5D4037;       /* brun */
+      --bg:#fff7e6;      /* fond doux */
+      --card:#ffffff;
+      --muted:#6b7280;
+      --line:#eee2c6;
+      --shadow: 0 10px 28px rgba(93,64,55,.12);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:
+        radial-gradient(900px 400px at 10% 0%, rgba(255,193,7,.45), transparent 60%),
+        radial-gradient(900px 400px at 90% 10%, rgba(255,152,0,.35), transparent 60%),
+        var(--bg);
+      color:#1f2937;
+    }
+
+    header{
+      position:sticky; top:0; z-index:20;
+      background: linear-gradient(90deg, var(--y), var(--o));
+      border-bottom: 1px solid rgba(93,64,55,.18);
+      padding: 14px 16px;
+    }
+
+    .topbar{
+      max-width:1100px; margin:auto;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      color:#2b1b16;
+    }
+    .logoDot{
+      width:44px; height:44px; border-radius:14px;
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(93,64,55,.25);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 6px 18px rgba(93,64,55,.12);
+      font-weight:1000;
+      letter-spacing:.5px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      line-height:1.05;
+      font-weight:1000;
+      letter-spacing:.3px;
+    }
+    .brand .tag{
+      margin-top:2px;
+      font-size:12px;
+      font-weight:800;
+      color: rgba(46,125,50,.95);
+      background: rgba(255,255,255,.5);
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(46,125,50,.25);
+    }
+
+    .pill{
+      font-size:12px;
+      font-weight:900;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.55);
+      border:1px solid rgba(93,64,55,.22);
+      color:#2b1b16;
+      white-space:nowrap;
+    }
+
+    .wrap{max-width:1100px; margin:auto; padding:16px}
+    .grid{display:grid; grid-template-columns: 2fr 1fr; gap:14px}
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      border:1px solid rgba(93,64,55,.16);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHead{
+      padding:14px 14px 10px 14px;
+      background: linear-gradient(180deg, rgba(255,193,7,.28), rgba(255,152,0,.10));
+      border-bottom:1px solid rgba(93,64,55,.12);
+    }
+
+    .row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .muted{color:var(--muted); font-size:13px}
+
+    .controls{
+      padding:12px 14px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(93,64,55,.10);
+      background: rgba(255,255,255,.6);
+    }
+
+    select,input,textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(93,64,55,.22);
+      outline:none;
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{min-height:80px; resize:vertical}
+
+    .products{
+      padding:14px;
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:12px;
+    }
+    @media(max-width:560px){ .products{grid-template-columns:1fr} }
+
+    .prod{
+      border-radius: 18px;
+      border:1px solid rgba(93,64,55,.18);
+      background:
+        radial-gradient(520px 160px at 0% 0%, rgba(255,193,7,.30), transparent 60%),
+        #fff;
+      padding:12px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .prod:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(93,64,55,.16);
+    }
+
+    .title{
+      font-weight:1000;
+      letter-spacing:.2px;
+    }
+
+    .price{
+      font-weight:1000;
+      color: var(--b);
+      background: rgba(255,152,0,.16);
+      border:1px solid rgba(93,64,55,.12);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    .badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(93,64,55,.14);
+      background: rgba(255,255,255,.7);
+      font-weight:900;
+      color:#2b1b16;
+    }
+    .badge.green{border-color:rgba(46,125,50,.25); color:rgba(46,125,50,.95)}
+    .badge.red{border-color:rgba(211,47,47,.25); color:rgba(211,47,47,.95)}
+
+    .btn{
+      width:100%;
+      padding:11px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(93,64,55,.18);
+      background: rgba(255,255,255,.7);
+      font-weight:1000;
+      cursor:pointer;
+      transition: transform .14s ease, filter .14s ease;
+    }
+    .btn:active{ transform: scale(.99) }
+
+    .btnPrimary{
+      background: linear-gradient(90deg, var(--r), #ff3b30);
+      color:#fff;
+      border:none;
+      box-shadow: 0 16px 26px rgba(211,47,47,.22);
+    }
+    .btnAdd{
+      background: linear-gradient(90deg, #111, #2b1b16);
+      color:#fff;
+      border:none;
+    }
+
+    .cartBody{padding:14px}
+    .hr{height:1px; background: rgba(93,64,55,.10); margin:12px 0}
+
+    .cartItem{
+      padding:10px 0;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+    }
+    .cartItem .name{font-weight:1000}
+    .cartItem .sub{font-size:13px; color:var(--muted)}
+    .miniBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .mini{
+      padding:8px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(93,64,55,.20);
+      background:#fff;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .mini.danger{border-color:rgba(211,47,47,.35); color:var(--r)}
+
+    .field{margin-top:10px}
+    .label{
+      font-size:12px; font-weight:1000;
+      color:#2b1b16;
+      margin:0 0 6px 4px;
+      display:flex; gap:8px; align-items:center;
+    }
+    .req{
+      font-size:11px;
+      font-weight:1000;
+      color: var(--r);
+      background: rgba(211,47,47,.10);
+      border:1px solid rgba(211,47,47,.18);
+      padding:2px 8px;
+      border-radius:999px;
+    }
+
+    .toast{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(46,125,50,.22);
+      background: rgba(46,125,50,.08);
+      color: rgba(46,125,50,.95);
+      font-weight:900;
+    }
+
+    .err{
+      display:none;
+      margin: 14px 0 0 0;
+      padding:12px 14px;
+      border-radius: 16px;
+      border:1px solid rgba(211,47,47,.25);
+      background: rgba(211,47,47,.08);
+      color: rgba(211,47,47,.95);
+      font-weight:900;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logoDot">BES</div>
+      <div>
+        <h1>Bes Fast Food</h1>
+        <div class="tag">Jeune • Rapide • Délicieux</div>
+      </div>
+    </div>
+    <div class="pill">Commande en ligne</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="err" class="err"></div>
+
+  <div class="grid">
+
+    <!-- MENU -->
+    <div class="card">
+      <div class="cardHead">
+        <div class="row">
+          <div>
+            <div style="font-weight:1000;font-size:18px">Menu</div>
+            <div class="muted">Produits affichés uniquement si <b>Stock &gt; 0</b></div>
+          </div>
+          <div style="max-width:260px; width:100%">
+            <select id="catFilter"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="products" class="products"></div>
+    </div>
+
+    <!-- PANIER -->
+    <div class="card">
+      <div class="cardHead">
+        <div class="row">
+          <div>
+            <div style="font-weight:1000;font-size:18px">Panier</div>
+            <div class="muted">Prépare ta commande 🔥</div>
+          </div>
+          <button class="btn" id="refreshBtn" type="button" style="max-width:170px">Rafraîchir</button>
+        </div>
+      </div>
+
+      <div class="cartBody">
+        <div id="cartItems" class="muted">Panier vide</div>
+
+        <div class="hr"></div>
+
+        <div class="row">
+          <b>Total</b>
+          <b id="total">0.00</b>
+        </div>
+
+        <div class="hr"></div>
+
+        <div style="font-weight:1000;margin-bottom:8px">Finaliser</div>
+
+        <div class="field">
+          <div class="label">Nom <span class="req">Obligatoire</span></div>
+          <input id="clientNom" placeholder="Ex: Jean Paul">
+        </div>
+
+        <div class="field">
+          <div class="label">Téléphone <span class="req">Obligatoire</span></div>
+          <input id="telephone" placeholder="Ex: +509...">
+        </div>
+
+        <div class="field">
+          <div class="label">Type de commande</div>
+          <select id="typeCommande">
+            <option>Sur place</option>
+            <option>À emporter</option>
+            <option>Livraison</option>
+          </select>
+        </div>
+
+        <!-- ✅ Adresse (affichée/obligatoire seulement si Livraison) -->
+        <div class="field" id="addrWrap" style="display:none">
+          <div class="label">Adresse de livraison <span class="req">Obligatoire</span></div>
+          <textarea id="adresse" placeholder="Ex: Rue..., maison..., repère..."></textarea>
+        </div>
+
+        <div class="field">
+          <div class="label">Note (optionnel)</div>
+          <textarea id="noteCommande" placeholder="Ex: sans piment..."></textarea>
+        </div>
+
+        <div style="margin-top:12px">
+          <button class="btn btnPrimary" id="checkoutBtn" type="button">Envoyer la commande ✅</button>
+          <div id="toast" class="toast"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const $ = (id)=>document.getElementById(id);
+  function showErr(t){
+    const e=$("err");
+    e.style.display="block";
+    e.textContent = String(t || "Erreur");
+  }
+  function hideErr(){
+    const e=$("err");
+    e.style.display="none";
+    e.textContent="";
+  }
+  function money(x){ return Number(x||0).toFixed(2); }
+
+  function gs(fn, ...args){
+    return new Promise((res,rej)=>{
+      google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args);
+    });
+  }
+
+  const state = { products:[], guestId:null, orderId:null };
+
+  function getGuestId(){
+    let id = localStorage.getItem("guestId");
+    if(!id){
+      id = "guest-" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)));
+      localStorage.setItem("guestId", id);
+    }
+    return id;
+  }
+
+  async function ensureDraft(){
+    if(!state.orderId){
+      const r = await gs("api_createOrGetDraftOrder", state.guestId);
+      if(!r.ok) throw new Error(r.error || "Impossible de créer Draft");
+      state.orderId = r.orderId;
+      localStorage.setItem("draftOrderId", state.orderId);
+    }
+  }
+
+  async function loadProducts(){
+    const r = await gs("api_getProducts");
+    if(!r.ok) throw new Error(r.error || "Impossible de charger les produits");
+    state.products = r.products || [];
+
+    const cats = Array.from(new Set(state.products.map(p=>p.Categorie).filter(Boolean)));
+    $("catFilter").innerHTML =
+      `<option value="">Toutes catégories</option>` + cats.map(c=>`<option>${c}</option>`).join("");
+    $("catFilter").onchange = renderProducts;
+
+    renderProducts();
+  }
+
+  function renderProducts(){
+    const cat = $("catFilter").value;
+    const list = state.products.filter(p => !cat || String(p.Categorie)===String(cat));
+    const box = $("products");
+
+    if(list.length===0){
+      box.innerHTML = `<div class="muted" style="padding:14px">Aucun produit disponible.</div>`;
+      return;
+    }
+
+    box.innerHTML = list.map(p=>`
+      <div class="prod">
+        <div class="row">
+          <div class="title">${p.Nom||""}</div>
+          <div class="price">${money(p.Prix)}</div>
+        </div>
+        <div class="muted" style="margin-top:6px">${p.Description||""}</div>
+
+        <div class="badges">
+          <span class="badge green">${p.Categorie||""}</span>
+          <span class="badge">Stock: ${Number(p.Stock||0)}</span>
+        </div>
+
+        <div style="margin-top:10px">
+          <button class="btn btnAdd" type="button"
+            onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">Ajouter au panier</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  window.addToCart = async function(productId){
+    try{
+      hideErr();
+      await ensureDraft();
+      const r = await gs("api_addItem", state.orderId, productId, 1);
+      if(!r.ok) throw new Error(r.error || "Erreur ajout panier");
+      await refreshCart();
+    }catch(e){ showErr(e.message || e); }
+  }
+
+  async function refreshCart(){
+    try{
+      hideErr();
+      if(!state.orderId){
+        state.orderId = localStorage.getItem("draftOrderId") || null;
+      }
+      if(!state.orderId){
+        $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
+        $("total").textContent = money(0);
+        return;
+      }
+
+      const r = await gs("api_getCart", state.orderId);
+      if(!r.ok){
+        $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
+        $("total").textContent = money(0);
+        return;
+      }
+
+      $("total").textContent = money(r.total);
+      const items = r.items || [];
+      if(items.length===0){
+        $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
+        return;
+      }
+
+      $("cartItems").innerHTML = items.map(it=>`
+        <div class="cartItem">
+          <div style="flex:1;min-width:0">
+            <div class="name">${it.Nom||""}</div>
+            <div class="sub">${money(it.Prix)} × ${Number(it.Quantite||0)} = <b>${money(it.SousTotal)}</b></div>
+          </div>
+          <div class="miniBtns">
+            <button class="mini" type="button" onclick="qty('${it.ItemID}', ${Number(it.Quantite||1)-1})">−</button>
+            <button class="mini" type="button" onclick="qty('${it.ItemID}', ${Number(it.Quantite||1)+1})">+</button>
+            <button class="mini danger" type="button" onclick="rm('${it.ItemID}')">Retirer</button>
+          </div>
+        </div>
+        <div class="hr"></div>
+      `).join("");
+    }catch(e){ showErr(e.message || e); }
+  }
+
+  window.qty = async function(itemId, q){
+    if(q<1) return;
+    await gs("api_updateItemQty", itemId, q);
+    await refreshCart();
+  }
+  window.rm = async function(itemId){
+    await gs("api_removeItem", itemId);
+    await refreshCart();
+  }
+
+  function syncAddressVisibility(){
+    const t = $("typeCommande").value.trim().toLowerCase();
+    const isLiv = (t === "livraison");
+    $("addrWrap").style.display = isLiv ? "block" : "none";
+    if(!isLiv) $("adresse").value = "";
+  }
+
+  async function checkout(){
+    try{
+      hideErr();
+      $("toast").style.display="none";
+      $("toast").textContent="";
+      await ensureDraft();
+
+      const payload = {
+        clientNom: $("clientNom").value.trim(),
+        telephone: $("telephone").value.trim(),
+        typeCommande: $("typeCommande").value,
+        adresse: $("adresse").value.trim(),
+        noteCommande: $("noteCommande").value.trim()
+      };
+
+      // ✅ Validation front (plus celle du serveur)
+      if(!payload.clientNom || !payload.telephone){
+        showErr("Nom et téléphone obligatoires.");
+        return;
+      }
+      if(payload.typeCommande.trim().toLowerCase()==="livraison" && !payload.adresse){
+        showErr("Adresse obligatoire pour la livraison.");
+        return;
+      }
+
+      const r = await gs("api_checkout", state.orderId, payload);
+      if(!r.ok) throw new Error(r.error || "Checkout error");
+
+      $("toast").style.display="block";
+      $("toast").textContent = `Commande envoyée ✅ Total: ${money(r.total)}`;
+
+      localStorage.removeItem("draftOrderId");
+      state.orderId = null;
+
+      await refreshCart();
+      await loadProducts();
+    }catch(e){ showErr(e.message || e); }
+  }
+
+  (async function(){
+    try{
+      state.guestId = getGuestId();
+      $("refreshBtn").onclick = refreshCart;
+      $("checkoutBtn").onclick = checkout;
+      $("typeCommande").onchange = syncAddressVisibility;
+
+      syncAddressVisibility();
+      await loadProducts();
+      await refreshCart();
+    }catch(e){ showErr(e.message || e); }
+  })();
+</script>
+
+</body>
+</html>
