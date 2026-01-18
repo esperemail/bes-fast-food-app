@@ -30,20 +30,9 @@
     .card h3 { margin:0 0 8px; font-size:15px; }
     .big { font-size:24px; font-weight:700; }
     .toast { position:fixed; right:12px; bottom:12px; background:#111; color:#fff; padding:10px 12px; border-radius:10px; display:none; }
-
-    /* ✅ Champs produits: fit écran */
-    .form-row {
-      display: grid;
-      grid-template-columns: 140px 1.5fr 1.2fr 120px 120px;
-      gap: 10px;
-      align-items: end;
-    }
-    @media (max-width: 900px) {
-      .form-row { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 480px) {
-      .form-row { grid-template-columns: 1fr; }
-    }
+    .form-row { display: grid; grid-template-columns: 140px 1.5fr 1.2fr 120px 120px; gap: 10px; align-items: end; }
+    @media (max-width: 900px) { .form-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
   </style>
 </head>
 
@@ -64,7 +53,6 @@
   <span class="muted">Ouvre avec <b>#k=TA_CLE</b> (lien secret)</span>
 </div>
 
-<!-- ================= COMMANDES ================= -->
 <section id="orders" class="active">
   <h2>📦 Commandes</h2>
 
@@ -74,7 +62,7 @@
       <option value="">Tous statuts</option>
       <option value="Reçue">Reçue</option>
       <option value="Prête">Prête</option>
-      <option value="Terminée">Terminée</option>
+      <option value="Prête à livrer">Prête à livrer</option>
       <option value="Annulée">Annulée</option>
     </select>
     <span class="pill">Dernière sync: <b id="lastSync">-</b></span>
@@ -84,7 +72,6 @@
   <table id="ordersTable"></table>
 </section>
 
-<!-- ================= PRODUITS ================= -->
 <section id="products">
   <h2>🍟 Produits</h2>
 
@@ -130,7 +117,6 @@
   <table id="productsTable"></table>
 </section>
 
-<!-- ================= DASHBOARD ================= -->
 <section id="dash">
   <h2>📊 Dashboard (Aujourd’hui)</h2>
   <div class="bar">
@@ -164,7 +150,7 @@
 
 <script>
 /************ CONFIG ************/
-const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
+const API_URL = "COLLE_ICI_TON_URL_APPS_SCRIPT_EXEC";
 let ADMIN_KEY = "";
 
 /************ STATE ************/
@@ -243,12 +229,10 @@ function startAuto(){
   autoState.textContent = "ON";
   autoTimer = setInterval(()=> loadOrders(false), AUTO_MS);
 }
-
 function stopAuto(){
   if (autoTimer) clearInterval(autoTimer);
   autoTimer = null;
 }
-
 function toggleAuto(){
   AUTO_ON = !AUTO_ON;
   startAuto();
@@ -270,6 +254,27 @@ function beep(){
   } catch(e){}
 }
 function testBeep(){ beep(); toast("Test son 🔔"); }
+
+/************ ✅ WhatsApp helpers ************/
+function normalizePhoneToWa(phone){
+  let p = String(phone||"").replace(/\s+/g,'').replace(/[()-]/g,'');
+  p = p.replace(/^\+/, '');
+  p = p.replace(/\D/g,'');
+  if (/^\d{8}$/.test(p)) p = "509" + p;
+  if (/^0\d{8}$/.test(p)) p = "509" + p.slice(1);
+  if (/^509\d{8}$/.test(p)) return p;
+  if (p.startsWith("509") && p.length >= 11) return p.slice(0,11);
+  return p;
+}
+function openWhatsAppToClient(phone, message){
+  const wa = normalizePhoneToWa(phone);
+  if(!wa || wa.length < 10){
+    alert("Téléphone client invalide pour WhatsApp: " + phone);
+    return;
+  }
+  const url = "https://wa.me/" + wa + "?text=" + encodeURIComponent(message);
+  window.open(url, "_blank");
+}
 
 /************ COMMANDES ************/
 function loadOrders(manual){
@@ -311,31 +316,34 @@ function loadOrders(manual){
     lastOrderIds = seenNow;
     localStorage.setItem("bes_admin_last_ids", JSON.stringify(Array.from(lastOrderIds)));
 
-    // render table
-    let html = "<tr><th>Date</th><th>Client</th><th>Téléphone</th><th>Type</th><th>Total</th><th>Statut</th><th>Résumé</th><th>Actions</th></tr>";
+    // render table (✅ Paiement ajouté)
+    let html = "<tr><th>Date</th><th>Client</th><th>Téléphone</th><th>Type</th><th>Paiement</th><th>Total</th><th>Statut</th><th>Résumé</th><th>Actions</th></tr>";
+
     orders.forEach(o=>{
       const oid = String(o.OrderID || "").trim();
       const stat = String(o.Statut || "");
       const rowClass = (stat === "Reçue") ? "new" : "";
       const resume = o.ResumeItems || (o.items ? o.items.map(it=> (it.Nom||"")+"("+ (it.Quantite||0) +")").join(", ") : "");
+      const isLiv = String(o.TypeCommande||"").toLowerCase() === "livraison";
+
       html += "<tr class='" + rowClass + "'>" +
         "<td>" + esc(fmtDate(o.DateHeure)) + "</td>" +
         "<td><b>" + esc(o.ClientNom || "") + "</b><br><span class='muted'>" + esc(o.Adresse || "") + "</span></td>" +
         "<td>" + esc(o.Telephone || "") + "</td>" +
         "<td>" + esc(o.TypeCommande || "") + "</td>" +
+        "<td>" + esc(o.PaymentMethod || "") + "</td>" +
         "<td>" + esc(o.Total || "") + "</td>" +
         "<td>" + esc(stat) + "</td>" +
         "<td>" + esc(resume || "") + "</td>" +
         "<td>" +
           "<button class='small' onclick=\"setStatus('" + oid + "','Prête')\">Prête</button> " +
-          "<button class='small' onclick=\"setStatus('" + oid + "','Terminée')\">Terminée</button> " +
+          "<button class='small' onclick=\"readyToDeliver('" + oid + "')\">Prête à livrer</button> " +
           "<button class='small' onclick=\"setStatus('" + oid + "','Annulée')\">Annuler</button> " +
-          "<button class='small' onclick=\"printTicket('" + oid + "')\">🖨 Ticket</button>" +
         "</td>" +
       "</tr>";
     });
-    el.innerHTML = html;
 
+    el.innerHTML = html;
     renderDashboardFromCache();
   });
 }
@@ -348,66 +356,18 @@ function setStatus(orderId, status){
   });
 }
 
-/************ ✅ TICKET (SANS <script> dans la string) ************/
-function printTicket(orderId){
+// ✅ Remplace Terminée: Prête à livrer + WhatsApp si Livraison
+function readyToDeliver(orderId){
   const o = (lastOrdersCache || []).find(x => String(x.OrderID||"") === String(orderId));
-  if (!o) { toast("Commande introuvable"); return; }
+  if(!o){ toast("Commande introuvable"); return; }
 
-  const items = Array.isArray(o.items) ? o.items : [];
-  const w = window.open("", "_blank", "width=380,height=700");
-  if (!w) { alert("Popup bloquée. Autorise les popups pour imprimer."); return; }
-
-  let rows = "";
-  for (const it of items) {
-    rows += "<tr>" +
-      "<td>" + esc(it.Nom || "") + "</td>" +
-      "<td style='text-align:right'>" + esc(it.Quantite || 0) + "</td>" +
-      "<td style='text-align:right'>" + esc(it.SousTotal || "") + "</td>" +
-    "</tr>";
-  }
+  setStatus(orderId, "Prête à livrer");
 
   const isLivraison = String(o.TypeCommande||"").toLowerCase() === "livraison";
-
-  const html =
-    "<!doctype html><html><head><meta charset='utf-8'/>" +
-    "<title>Ticket " + esc(orderId) + "</title>" +
-    "<style>" +
-    "body{ font-family: Arial, sans-serif; margin:12px; }" +
-    "h2{ margin:0 0 6px; }" +
-    ".muted{ color:#666; font-size:12px; }" +
-    "table{ width:100%; border-collapse:collapse; margin-top:8px; }" +
-    "td,th{ border-bottom:1px dashed #ccc; padding:6px 0; font-size:13px; }" +
-    ".tot{ font-size:16px; font-weight:700; margin-top:10px; }" +
-    ".hr{ border-top:1px solid #000; margin:10px 0; }" +
-    "</style></head><body>" +
-    "<h2>BES Fast Food</h2>" +
-    "<div class='muted'>Ticket cuisine</div>" +
-    "<div class='hr'></div>" +
-    "<div><b>Commande:</b> " + esc(orderId) + "</div>" +
-    "<div><b>Date:</b> " + esc(fmtDate(o.DateHeure)) + "</div>" +
-    "<div><b>Client:</b> " + esc(o.ClientNom || "") + "</div>" +
-    "<div><b>Tél:</b> " + esc(o.Telephone || "") + "</div>" +
-    "<div><b>Type:</b> " + esc(o.TypeCommande || "") + "</div>" +
-    (isLivraison ? "<div><b>Adresse:</b> " + esc(o.Adresse || "") + "</div>" : "") +
-    (o.NoteCommande ? "<div><b>Note:</b> " + esc(o.NoteCommande) + "</div>" : "") +
-    "<div class='hr'></div>" +
-    "<table>" +
-    "<tr><th>Produit</th><th style='text-align:right'>Qté</th><th style='text-align:right'>Sous-total</th></tr>" +
-    (rows || "<tr><td colspan='3'>Aucun item</td></tr>") +
-    "</table>" +
-    "<div class='tot'>TOTAL: " + esc(o.Total || 0) + " HTG</div>" +
-    "<div class='muted' style='margin-top:8px'>Impression...</div>" +
-    "</body></html>";
-
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-
-  // ✅ on déclenche print sans insérer de <script> dans la page
-  w.onload = function(){
-    w.focus();
-    w.print();
-  };
+  if(isLivraison){
+    const msg = "Votre commande est prête, la livraison se fait sous peu. Merci d'avoir choisi Bes Fast Food!";
+    openWhatsAppToClient(o.Telephone || "", msg);
+  }
 }
 
 /************ PRODUITS ************/
@@ -451,7 +411,6 @@ function loadProducts(){
 
     el.innerHTML = html;
 
-    // click ligne → remplir formulaire
     document.querySelectorAll("#productsTable .prodRow").forEach(tr => {
       tr.addEventListener("click", () => {
         const i = Number(tr.dataset.idx);
@@ -562,7 +521,6 @@ function renderDashboardFromCache(){
 /************ HELPERS ************/
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m])); }
 function escAttr(s){ return String(s ?? "").replace(/"/g,"&quot;"); }
-
 function parseDateAny(v){
   if (!v) return null;
   if (v instanceof Date) return v;
@@ -570,7 +528,6 @@ function parseDateAny(v){
   if (isNaN(d.getTime())) return null;
   return d;
 }
-
 function fmtDate(v){
   const d = parseDateAny(v);
   if (!d) return String(v||"");
