@@ -214,6 +214,16 @@
       color:#fff; border:none;
     }
 
+    /* ✅ IMPORTANT: rendre le disabled visible */
+    button:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      filter: grayscale(.25);
+    }
+    .btnPrimary:disabled{
+      box-shadow:none !important;
+    }
+
     .cartBody{padding:14px}
     .hr{height:1px; background: rgba(93,64,55,.10); margin:12px 0}
 
@@ -312,7 +322,9 @@
         <div class="brandTag">Fast Food</div>
       </div>
     </div>
-    <div class="pill">Commande en ligne</div>
+
+    <!-- ✅ Tag visible pour vérifier que GitHub Pages a bien pris la nouvelle version -->
+    <div class="pill">Commande en ligne • WhatsApp v2</div>
   </div>
 </header>
 
@@ -407,7 +419,7 @@
           <div class="label">Paiement <span class="req">Obligatoire</span></div>
           <div class="payBox">
             <label class="payRow">
-              <input type="radio" name="pay" value="Moncash" style="margin-top:2px">
+              <input type="radio" name="pay" value="MonCash" style="margin-top:2px">
               <div>
                 <div class="payTitle">MonCash — 48094439 — RALJnPIE</div>
                 <div class="paySub">Choisis MonCash si tu as payé sur ce numéro.</div>
@@ -415,7 +427,7 @@
             </label>
 
             <label class="payRow">
-              <input type="radio" name="pay" value="Natcash" style="margin-top:2px">
+              <input type="radio" name="pay" value="NatCash" style="margin-top:2px">
               <div>
                 <div class="payTitle">NatCash — 40430164 — RALJnPIE</div>
                 <div class="paySub">Choisis NatCash si tu as payé sur ce numéro.</div>
@@ -447,7 +459,7 @@
    * CONFIG (WhatsApp uniquement)
    *********************/
   // ✅ IMPORTANT: wa.me veut seulement les chiffres (pas de +)
-  const WHATSAPP_NUMBER = "50940430164";
+  const WHATSAPP_NUMBER = "+50940430164";
 
   /*********************
    * PRODUITS (STATIC)
@@ -749,10 +761,9 @@
   }
 
   /*********************
-   * WhatsApp (message seulement)
+   * WhatsApp (message seulement - pas d'image attachée par lien)
    *********************/
   function openWhatsApp(message){
-    // wa.me accepte uniquement les chiffres
     const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank");
   }
@@ -794,7 +805,6 @@
 
       const cart = loadCart();
       const itemsFull = cartToItems(cart);
-      const itemsLite = itemsFull.map(it => ({ ProductID: it.ProductID, Quantite: it.Quantite }));
       const total = cartTotal(cart);
 
       if(itemsFull.length === 0 || total <= 0){
@@ -820,8 +830,7 @@
         typeCommande: $("typeCommande").value,
         adresse: $("adresse").value.trim(),
         noteCommande: $("noteCommande").value.trim(),
-        paymentMethod: paymentMethod,
-        items: itemsLite
+        paymentMethod: paymentMethod
       };
 
       if(!payload.clientNom || !payload.telephone){
@@ -835,15 +844,14 @@
 
       setBusy(true);
 
-      // ✅ Ouvre WhatsApp avec le message
-      const waMsg = buildWhatsAppMessage(payload, payload.items, total);
+      // ✅ Ouvre WhatsApp avec le message (sans image attachée)
+      const waMsg = buildWhatsAppMessage(payload, itemsFull, total);
       openWhatsApp(waMsg);
 
-      // ✅ Ici : pas de serveur, donc pas d'erreur serveur.
       toast("WhatsApp ouvert ✅ Envoie maintenant l'image (preuve) dans ce chat.");
       setTimeout(clearToast, 4000);
 
-      // ✅ Option : vider automatiquement le panier
+      // ✅ Option: vider automatiquement après ouverture WhatsApp
       clearCart();
       renderCart();
       $("noteCommande").value = "";
@@ -851,7 +859,6 @@
       $("typeCommande").value = "Sur place";
       syncAddressVisibility();
 
-      // reset image + paiement
       $("paymentProof").value = "";
       document.querySelectorAll("input[name='pay']").forEach(x=> x.checked = false);
       validateCheckoutButton();
