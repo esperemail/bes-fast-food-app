@@ -78,29 +78,30 @@
 
   <h3>➕ Ajouter / Modifier (dropdown éditable)</h3>
   <div class="row">
-    <div>
-      <label class="muted">ProductID</label>
-      <input id="pId" placeholder="Ex: P001" list="prodIdList" />
-      <datalist id="prodIdList"></datalist>
-    </div>
-    <div>
-      <label class="muted">Nom</label>
-      <input id="pName" placeholder="Nom du produit" />
-    </div>
-    <div>
-      <label class="muted">Catégorie (tu peux taper une nouvelle)</label>
-      <input id="pCat" placeholder="Ex: Burgers" list="catList" />
-      <datalist id="catList"></datalist>
-    </div>
-    <div>
-      <label class="muted">Prix</label>
-      <input id="pPrice" type="number" placeholder="Prix" />
-    </div>
-    <div>
-      <label class="muted">Stock</label>
-      <input id="pStock" type="number" placeholder="Stock" />
-    </div>
+  <div>
+    <label class="muted">ProductID</label>
+    <input id="pId" placeholder="Ex: P001" list="prodIdList" />
+    <datalist id="prodIdList"></datalist>
   </div>
+  <div>
+    <label class="muted">Nom</label>
+    <input id="pName" placeholder="Nom du produit" />
+  </div>
+  <div>
+    <label class="muted">Catégorie (tu peux taper une nouvelle)</label>
+    <input id="pCat" placeholder="Ex: Burgers" list="catList" />
+    <datalist id="catList"></datalist>
+  </div>
+  <div>
+    <label class="muted">Prix</label>
+    <input id="pPrice" type="number" placeholder="Prix" />
+  </div>
+  <div>
+    <label class="muted">Stock</label>
+    <input id="pStock" type="number" placeholder="Stock" />
+  </div>
+</div>
+
 
   <div class="bar">
     <button class="primary" onclick="saveProduct()">💾 Enregistrer</button>
@@ -621,6 +622,31 @@
     if (!d) return String(v || "");
     return d.toLocaleString();
   }
+  /* Ligne formulaire produits */
+.form-row {
+  display: grid;
+  grid-template-columns: 140px 1.5fr 1.2fr 120px 120px;
+  gap: 10px;
+  align-items: end;
+}
+
+/* Inputs plus compacts */
+.form-row input {
+  width: 100%;
+}
+
+/* Responsive mobile */
+@media (max-width: 900px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 </script>
 
 </body>
