@@ -102,7 +102,7 @@ function jsonp(action, params, cb){
 
 /************ COMMANDES ************/
 function loadOrders(){
-  jsonp("admin_Orders", {}, res=>{
+  jsonp("admin_listOrders", {}, res=>{
     const el = document.getElementById("ordersTable");
     if (!res.ok) return el.innerHTML = "<tr><td>"+res.error+"</td></tr>";
 
@@ -133,7 +133,7 @@ function setStatus(orderId, status){
 
 /************ PRODUITS ************/
 function loadProducts(){
-  jsonp("admin_Products", {}, res=>{
+  jsonp("admin_listProducts", {}, res=>{
     const el = document.getElementById("productsTable");
     if (!res.ok) return el.innerHTML = "<tr><td>"+res.error+"</td></tr>";
 
