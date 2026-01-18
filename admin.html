@@ -19,9 +19,7 @@
     th, td { border:1px solid #ddd; padding:8px; font-size:14px; vertical-align:top; }
     th { background:#f0f0f0; text-align:left; }
     tr.new { background:#fff3cd; }
-    .row { display:flex; gap:8px; flex-wrap:wrap; }
-    .row > div { flex: 1; min-width: 160px; }
-    input, select, textarea { padding:8px; width:100%; border:1px solid #ccc; border-radius:8px; }
+    input, select, textarea { padding:8px; width:100%; border:1px solid #ccc; border-radius:8px; box-sizing:border-box; }
     textarea { min-height: 70px; }
     button { padding:8px 12px; border:1px solid #bbb; border-radius:8px; cursor:pointer; background:#fff; }
     button.primary { background:#111; color:#fff; border-color:#111; }
@@ -32,6 +30,20 @@
     .card h3 { margin:0 0 8px; font-size:15px; }
     .big { font-size:24px; font-weight:700; }
     .toast { position:fixed; right:12px; bottom:12px; background:#111; color:#fff; padding:10px 12px; border-radius:10px; display:none; }
+
+    /* ✅ Champs produits: fit écran */
+    .form-row {
+      display: grid;
+      grid-template-columns: 140px 1.5fr 1.2fr 120px 120px;
+      gap: 10px;
+      align-items: end;
+    }
+    @media (max-width: 900px) {
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 
@@ -81,8 +93,8 @@
     <button onclick="clearForm()">➕ Nouveau</button>
   </div>
 
-  <h3>➕ Ajouter / Modifier (dropdown éditable)</h3>
-  <div class="row">
+  <h3>➕ Ajouter / Modifier</h3>
+  <div class="form-row">
     <div>
       <label class="muted">ProductID</label>
       <input id="pId" placeholder="Ex: P001" list="prodIdList" />
@@ -93,7 +105,7 @@
       <input id="pName" placeholder="Nom du produit" />
     </div>
     <div>
-      <label class="muted">Catégorie (tu peux taper une nouvelle)</label>
+      <label class="muted">Catégorie</label>
       <input id="pCat" placeholder="Ex: Burgers" list="catList" />
       <datalist id="catList"></datalist>
     </div>
@@ -152,7 +164,7 @@
 
 <script>
 /************ CONFIG ************/
-const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec"; // <-- remplace par https://script.google.com/macros/s/XXXX/exec
+const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
 let ADMIN_KEY = "";
 
 /************ STATE ************/
@@ -270,8 +282,8 @@ function loadOrders(manual){
 
     const el = document.getElementById("ordersTable");
     if (!res.ok) {
-      ordersMsg.innerHTML = "<span class='err'>" + (res.error || res.message || "Erreur") + "</span>";
-      el.innerHTML = "<tr><td>" + (res.error || res.message || "Erreur") + "</td></tr>";
+      ordersMsg.innerHTML = "<span class='err'>" + esc(res.error || res.message || "Erreur") + "</span>";
+      el.innerHTML = "<tr><td>" + esc(res.error || res.message || "Erreur") + "</td></tr>";
       return;
     }
     ordersMsg.innerHTML = "";
@@ -408,7 +420,7 @@ function loadProducts(){
     document.getElementById("prodIdList").innerHTML =
       pidList.map(id=>"<option value=\"" + escAttr(id) + "\"></option>").join("");
 
-    // table (SANS template literals, stable)
+    // table
     let html = "<tr><th>ID</th><th>Nom</th><th>Cat.</th><th>Prix</th><th>Stock</th><th>Maj stock</th></tr>";
 
     productsCache.forEach((p, idx) => {
