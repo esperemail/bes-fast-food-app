@@ -7,9 +7,16 @@
 
   <style>
     :root{
-      --y:#FFC107; --o:#FF9800; --r:#D32F2F; --g:#2E7D32; --b:#5D4037;
-      --bg:#fff7e6; --card:#ffffff; --muted:#6b7280;
-      --shadow: 0 12px 30px rgba(93,64,55,.14); --radius: 18px;
+      --y:#FFC107;
+      --o:#FF9800;
+      --r:#D32F2F;
+      --g:#2E7D32;
+      --b:#5D4037;
+      --bg:#fff7e6;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --shadow: 0 12px 30px rgba(93,64,55,.14);
+      --radius: 18px;
     }
     *{box-sizing:border-box}
     body{
@@ -21,30 +28,83 @@
         radial-gradient(900px 420px at 90% 10%, rgba(255,152,0,.38), transparent 60%),
         var(--bg);
     }
+
     header{
       position:sticky; top:0; z-index:50;
       background: linear-gradient(90deg, var(--y), var(--o));
       border-bottom:1px solid rgba(93,64,55,.18);
       padding: 10px 14px;
     }
-    .topbar{ max-width:1100px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .brand{ display:flex; align-items:center; gap:12px; min-width:0; }
+    .topbar{
+      max-width:1100px;
+      margin:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
     .logoWrap{
-      width:56px; height:56px; border-radius:16px;
+      width:56px; height:56px;
+      border-radius:16px;
       background: rgba(255,255,255,.80);
       border:2px solid rgba(93,64,55,.28);
       box-shadow: 0 10px 22px rgba(93,64,55,.18);
       display:flex; align-items:center; justify-content:center;
-      overflow:hidden; flex:0 0 auto;
-      font-weight:1000; color:#2b1b16;
+      overflow:hidden;
+      flex:0 0 auto;
     }
-    .brandText{ display:flex; flex-direction:column; line-height:1.05; width: 120px; min-width:120px; }
-    .brandName{ font-size:22px; font-weight:1000; letter-spacing: 8px; color:#2b1b16; white-space:nowrap; }
-    .brandTag{ margin-top:4px; font-size:13px; font-weight:1000; color: rgba(46,125,50,.95); white-space:nowrap; }
+    .logoWrap img{
+      width:100%; height:100%;
+      object-fit:contain;
+      display:block;
+    }
+    .brandText{
+      display:flex;
+      flex-direction:column;
+      line-height:1.05;
+      width: 120px;
+      min-width:120px;
+    }
+    .brandName{
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing: 8px;
+      color:#2b1b16;
+      text-align:left;
+      white-space:nowrap;
+    }
+    .brandTag{
+      margin-top:4px;
+      font-size:13px;
+      font-weight:1000;
+      color: rgba(46,125,50,.95);
+      text-align:left;
+      white-space:nowrap;
+    }
+
     .pill{
-      font-size:12px; font-weight:1000; padding:10px 14px; border-radius:999px;
-      background: rgba(255,255,255,.65); border:1px solid rgba(93,64,55,.22); color:#2b1b16;
-      white-space:nowrap; box-shadow: 0 10px 20px rgba(93,64,55,.12);
+      font-size:12px;
+      font-weight:1000;
+      padding:10px 14px;
+      border-radius:999px;
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(93,64,55,.22);
+      color:#2b1b16;
+      white-space:nowrap;
+      box-shadow: 0 10px 20px rgba(93,64,55,.12);
+    }
+    @media (max-width:520px){
+      .brandText{width:108px;min-width:108px}
+      .brandName{font-size:18px; letter-spacing:6px}
+      .brandTag{font-size:12px}
+      .pill{padding:9px 12px}
+      .logoWrap{width:50px;height:50px}
     }
 
     .wrap{max-width:1100px; margin:auto; padding:16px}
@@ -94,12 +154,26 @@
     .prod{
       border-radius: 18px;
       border:1px solid rgba(93,64,55,.18);
-      background: radial-gradient(520px 160px at 0% 0%, rgba(255,193,7,.30), transparent 60%), #fff;
+      background:
+        radial-gradient(520px 160px at 0% 0%, rgba(255,193,7,.30), transparent 60%),
+        #fff;
       padding:12px;
       transition: transform .18s ease, box-shadow .18s ease;
+      position:relative;
     }
     .prod:hover{ transform: translateY(-2px); box-shadow: 0 18px 34px rgba(93,64,55,.16); }
 
+    .prodTop{display:flex; gap:10px}
+    .thumb{
+      width:72px; height:72px; border-radius:16px;
+      background: rgba(255,152,0,.16);
+      border:1px solid rgba(93,64,55,.14);
+      overflow:hidden;
+      flex:0 0 auto;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:1000; color:#2b1b16;
+    }
+    .thumb img{width:100%; height:100%; object-fit:cover; display:block}
     .title{font-weight:1000; letter-spacing:.2px; margin:0}
     .desc{margin-top:6px; font-size:13px; color:var(--muted)}
     .price{
@@ -109,6 +183,15 @@
       padding:6px 10px; border-radius:999px; white-space:nowrap;
       display:inline-block;
     }
+    .badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .badge{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(93,64,55,.14);
+      background: rgba(255,255,255,.75);
+      font-weight:1000; color:#2b1b16;
+    }
+    .badge.green{border-color:rgba(46,125,50,.25); color:rgba(46,125,50,.95)}
+    .badge.pink{border-color:rgba(211,47,47,.20); color:rgba(211,47,47,.90)}
 
     .btn{
       width:100%;
@@ -126,58 +209,95 @@
       color:#fff; border:none;
       box-shadow: 0 16px 26px rgba(211,47,47,.22);
     }
-    .btnAdd{ background: linear-gradient(90deg, #111, #2b1b16); color:#fff; border:none; }
-    .btn[disabled]{ opacity:.55; cursor:not-allowed; filter:saturate(.9); }
+    .btnAdd{
+      background: linear-gradient(90deg, #111, #2b1b16);
+      color:#fff; border:none;
+    }
 
     .cartBody{padding:14px}
     .hr{height:1px; background: rgba(93,64,55,.10); margin:12px 0}
-    .cartItem{ padding:10px 0; display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+
+    .cartItem{
+      padding:10px 0;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+    }
     .cartItem .name{font-weight:1000}
     .cartItem .sub{font-size:13px; color:var(--muted)}
     .miniBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
-    .mini{ padding:8px 10px; border-radius:12px; border:1px solid rgba(93,64,55,.20); background:#fff; font-weight:1000; cursor:pointer; }
+    .mini{
+      padding:8px 10px; border-radius: 12px;
+      border:1px solid rgba(93,64,55,.20);
+      background:#fff; font-weight:1000; cursor:pointer;
+    }
     .mini.danger{border-color:rgba(211,47,47,.35); color:var(--r)}
 
     .field{margin-top:10px}
-    .label{ font-size:12px; font-weight:1000; color:#2b1b16; margin:0 0 6px 4px; display:flex; gap:8px; align-items:center; }
+    .label{
+      font-size:12px; font-weight:1000;
+      color:#2b1b16;
+      margin:0 0 6px 4px;
+      display:flex; gap:8px; align-items:center;
+    }
     .req{
       font-size:11px; font-weight:1000; color: var(--r);
       background: rgba(211,47,47,.10);
       border:1px solid rgba(211,47,47,.18);
       padding:2px 8px; border-radius:999px;
     }
+
     .toast{
-      display:none; margin-top:10px; padding:10px 12px; border-radius:14px;
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
       border:1px solid rgba(46,125,50,.22);
       background: rgba(46,125,50,.08);
       color: rgba(46,125,50,.95);
       font-weight:1000;
     }
     .err{
-      display:none; margin: 14px 0 0 0; padding:12px 14px; border-radius:16px;
+      display:none;
+      margin: 14px 0 0 0;
+      padding:12px 14px;
+      border-radius: 16px;
       border:1px solid rgba(211,47,47,.25);
       background: rgba(211,47,47,.08);
       color: rgba(211,47,47,.95);
       font-weight:1000;
     }
+
+    .loading{ padding:14px; color:var(--muted); font-weight:900; }
     .dim{ opacity:.65; pointer-events:none; filter:saturate(.9); }
 
-    .payBox{ border:1px solid rgba(93,64,55,.16); background: rgba(255,255,255,.72); border-radius:16px; padding:12px; margin-top:10px; }
+    /* ✅ bloc paiement */
+    .payBox{
+      border:1px solid rgba(93,64,55,.16);
+      border-radius:16px;
+      padding:10px 12px;
+      background: rgba(255,255,255,.65);
+    }
     .payRow{
-      display:flex; gap:10px; align-items:flex-start;
-      padding:10px; border-radius:14px;
-      border:1px solid rgba(93,64,55,.14);
-      background:#fff; margin-top:8px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:8px 0;
+      border-top:1px dashed rgba(93,64,55,.16);
     }
-    .payRow input{ width:auto; margin-top:3px; }
-    .payMeta{ font-size:13px; color:#2b1b16; }
-    .payMeta b{ font-weight:1000; }
-
-    .preview{
-      margin-top:8px; border-radius:14px; overflow:hidden;
-      border:1px solid rgba(93,64,55,.14); background:#fff; display:none;
+    .payRow:first-child{ border-top:none; }
+    .payTitle{ font-weight:1000; margin:0; }
+    .paySub{ font-size:12px; color:var(--muted); margin-top:4px; }
+    .fileHint{ font-size:12px; color:var(--muted); margin-top:6px; }
+    .proofOk{
+      display:none;
+      margin-top:8px;
+      font-size:12px;
+      font-weight:900;
+      color:rgba(46,125,50,.95);
+      background: rgba(46,125,50,.08);
+      border:1px solid rgba(46,125,50,.22);
+      padding:8px 10px;
+      border-radius:12px;
     }
-    .preview img{ width:100%; display:block; max-height:240px; object-fit:contain; }
   </style>
 </head>
 
@@ -185,7 +305,9 @@
 <header>
   <div class="topbar">
     <div class="brand">
-      <div class="logoWrap">BES</div>
+      <div class="logoWrap">
+        <img src="logo.jpg" alt="BES Fast Food" onerror="this.remove()">
+      </div>
       <div class="brandText">
         <div class="brandName">BES</div>
         <div class="brandTag">Fast Food</div>
@@ -199,13 +321,14 @@
   <div id="err" class="err"></div>
 
   <div class="grid">
+
     <!-- MENU -->
     <div class="card">
       <div class="cardHead">
         <div class="row">
           <div>
             <div style="font-weight:1000;font-size:18px">Menu</div>
-            <div class="muted">Preuve (image) via WhatsApp • Données via Sheets</div>
+            <div class="muted">Disponible</div>
           </div>
           <div style="max-width:260px; width:100%">
             <select id="catFilter"></select>
@@ -220,7 +343,9 @@
         <button class="btn" id="resetCartBtn" type="button" style="max-width:180px">Vider panier</button>
       </div>
 
-      <div id="products" class="products"></div>
+      <div id="products" class="products">
+        <div class="loading">Chargement du menu...</div>
+      </div>
     </div>
 
     <!-- PANIER -->
@@ -229,7 +354,7 @@
         <div class="row">
           <div>
             <div style="font-weight:1000;font-size:18px">Panier</div>
-            <div class="muted">Checkout: WhatsApp + Sheets (sans image)</div>
+            <div class="muted">Local & instantané 🔥</div>
           </div>
           <button class="btn" id="refreshBtn" type="button" style="max-width:170px">Actualiser</button>
         </div>
@@ -278,74 +403,64 @@
           <textarea id="noteCommande" placeholder="Ex: sans piment..."></textarea>
         </div>
 
-        <!-- ✅ PAIEMENT -->
-        <div class="payBox">
-          <div style="font-weight:1000">Paiement (obligatoire)</div>
-          <div class="muted" style="margin-top:4px">
-            Choisis une méthode + écris la référence. La preuve image part sur WhatsApp.
+        <!-- ✅ Paiement obligatoire -->
+        <div class="field">
+          <div class="label">Paiement <span class="req">Obligatoire</span></div>
+          <div class="payBox">
+            <label class="payRow">
+              <input type="radio" name="pay" value="Moncash" style="margin-top:2px">
+              <div>
+                <div class="payTitle">MonCash — 48094439 — RALJnPIE</div>
+                <div class="paySub">Choisis MonCash si tu as payé sur ce numéro.</div>
+              </div>
+            </label>
+
+            <label class="payRow">
+              <input type="radio" name="pay" value="Natcash" style="margin-top:2px">
+              <div>
+                <div class="payTitle">NatCash — 40430164 — RALJnPIE</div>
+                <div class="paySub">Choisis NatCash si tu as payé sur ce numéro.</div>
+              </div>
+            </label>
           </div>
+        </div>
 
-          <label class="payRow">
-            <input type="radio" name="paymentMethod" value="Moncash">
-            <div class="payMeta">
-              <b>MonCash</b><br>
-              48094439 — RALJnPIE
-            </div>
-          </label>
-
-          <label class="payRow">
-            <input type="radio" name="paymentMethod" value="Natcash">
-            <div class="payMeta">
-              <b>NatCash</b><br>
-              40430164 — RALJnPIE
-            </div>
-          </label>
-
-          <div class="field" style="margin-top:10px">
-            <div class="label">Référence paiement <span class="req">Obligatoire</span></div>
-            <input id="paymentRef" placeholder="Ex: code transaction MonCash/NatCash">
-          </div>
-
-          <div class="field" style="margin-top:10px">
-            <div class="label">Preuve de paiement (image) <span class="req">Obligatoire</span></div>
-            <input id="paymentProof" type="file" accept="image/*" capture="environment">
-            <div class="muted" style="margin-top:6px">
-              L’image n’est pas envoyée au serveur. Elle doit être envoyée sur WhatsApp.
-            </div>
-
-            <div class="preview" id="proofPreview">
-              <img id="proofImg" alt="Aperçu preuve">
-            </div>
-          </div>
+        <!-- ✅ preuve image obligatoire (upload seulement) -->
+        <div class="field">
+          <div class="label">Preuve de paiement (image) <span class="req">Obligatoire</span></div>
+          <!-- ✅ capture="environment" retiré => pas d'obligation photo -->
+          <input id="paymentProof" type="file" accept="image/*">
+          <div class="fileHint">Sélectionne une image (capture / screenshot). Ensuite on t’envoie sur WhatsApp pour l’envoyer.</div>
+          <div class="proofOk" id="proofOk">✅ Image sélectionnée</div>
         </div>
 
         <div style="margin-top:12px">
-          <button class="btn btnPrimary" id="checkoutBtn" type="button" disabled>Passer la commande ✅</button>
+          <button class="btn btnPrimary" id="checkoutBtn" type="button" disabled>Envoyer la commande ✅</button>
           <div id="toast" class="toast"></div>
         </div>
-
       </div>
     </div>
+
   </div>
 </div>
 
 <script>
   /*********************
-   * ✅ CONFIG (à modifier)
+   * CONFIG
    *********************/
-  const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
-  const WHATSAPP_NUMBER = "+50940430164"; // sans +, ex: 50937000000
+  const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec"; // ex: https://script.google.com/macros/s/XXXX/exec
+  const WHATSAPP_NUMBER = "+50940430164"; // numéro BES (sans +)
 
   /*********************
    * PRODUITS (STATIC)
    *********************/
   const STATIC_PRODUCTS = [
-    { ProductID:"1", Nom:"Cornet (Pack de 6)", Prix:1250, Description:"", Categorie:"Nourriture" },
-    { ProductID:"2", Nom:"Gratiné simple",      Prix:1000, Description:"", Categorie:"Nourriture" },
-    { ProductID:"3", Nom:"Gratiné wings",       Prix:1000, Description:"", Categorie:"Nourriture" },
-    { ProductID:"4", Nom:"Wings simple",        Prix:750,  Description:"", Categorie:"Nourriture" },
-    { ProductID:"5", Nom:"Cupcake (Pack de 6)", Prix:1500, Description:"", Categorie:"Dessert" },
-    { ProductID:"6", Nom:"Lasagne et wings",    Prix:1500, Description:"", Categorie:"Nourriture" }
+    { ProductID:"1", Nom:"Cornet (Pack de 6)", Prix:1250, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"2", Nom:"Gratiné simple",      Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"3", Nom:"Gratiné wings",       Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"4", Nom:"Wings simple",        Prix:750,  Description:"", Categorie:"Nourriture", Image:"" },
+    { ProductID:"5", Nom:"Cupcake (Pack de 6)", Prix:1500, Description:"", Categorie:"Dessert",    Image:"" },
+    { ProductID:"6", Nom:"Lasagne et wings",    Prix:1500, Description:"", Categorie:"Nourriture", Image:"" }
   ];
 
   /*********************
@@ -353,15 +468,13 @@
    *********************/
   const $ = (id)=>document.getElementById(id);
   const CART_KEY = "bes_cart_v1";
-  const state = { guestId:null, products:STATIC_PRODUCTS, proofSelected:false };
 
   function norm(s){ return String(s||"").toLowerCase().trim(); }
 
-  // ✅ 1,250.00 HTG
-  function moneyHTG(x){
-    const n = Number(x||0);
-    const s = n.toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 });
-    return s + " HTG";
+  // ✅ Format: 1,250.00 HTG
+  function fmtHTG(n){
+    const x = Number(n||0);
+    return x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " HTG";
   }
 
   function showErr(t){
@@ -385,31 +498,68 @@
     t.style.display="none";
     t.textContent="";
   }
-  function setBusy(isBusy){
-    const card = $("cartCard");
-    if(isBusy) card.classList.add("dim");
-    else card.classList.remove("dim");
-    $("checkoutBtn").disabled = !!isBusy;
-  }
 
-  function getGuestId(){
-    let id = localStorage.getItem("guestId");
-    if(!id){
-      id = "guest-" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)));
-      localStorage.setItem("guestId", id);
-    }
-    return id;
+  function safeImgUrl(u){
+    const url = String(u||"").trim();
+    if(!url) return "";
+    if(/^https?:\/\//i.test(url)) return url;
+    if(url.startsWith("./") || url.startsWith("assets/")) return url;
+    return "";
   }
 
   function syncAddressVisibility(){
-    const isLiv = (norm($("typeCommande").value) === "livraison");
+    const t = norm($("typeCommande").value);
+    const isLiv = (t === "livraison");
     $("addrWrap").style.display = isLiv ? "block" : "none";
     if(!isLiv) $("adresse").value = "";
-    validateCheckoutBtn();
   }
 
   /*********************
-   * CART
+   * JSONP API (GitHub -> Apps Script)
+   *********************/
+  function apiJsonp(action, params = {}) {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(16).slice(2);
+      const q = new URLSearchParams({ action, callback: cb, ...params }).toString();
+      const url = API_URL + "?" + q;
+
+      const s = document.createElement("script");
+      s.src = url;
+      s.async = true;
+
+      let done = false;
+      const timer = setTimeout(()=>{
+        if(done) return;
+        done = true;
+        try { delete window[cb]; } catch(e){}
+        try { s.remove(); } catch(e){}
+        reject(new Error("Timeout API"));
+      }, 15000);
+
+      window[cb] = (data) => {
+        if(done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[cb]; } catch(e){}
+        try { s.remove(); } catch(e){}
+        resolve(data);
+      };
+
+      s.onerror = () => {
+        if(done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[cb]; } catch(e){}
+        try { s.remove(); } catch(e){}
+        reject(new Error("API error / network"));
+      };
+
+      document.head.appendChild(s);
+    });
+  }
+
+  /*********************
+   * LOCAL CART
    *********************/
   function loadCart(){
     try{
@@ -419,8 +569,12 @@
       return (obj && typeof obj === "object") ? obj : {};
     }catch(_){ return {}; }
   }
-  function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart || {})); }
-  function clearCart(){ localStorage.removeItem(CART_KEY); }
+  function saveCart(cart){
+    localStorage.setItem(CART_KEY, JSON.stringify(cart || {}));
+  }
+  function clearCart(){
+    localStorage.removeItem(CART_KEY);
+  }
 
   function cartToItems(cartObj){
     const items = [];
@@ -436,6 +590,7 @@
     }
     return items;
   }
+
   function cartTotal(cartObj){
     let total = 0;
     for(const [pid, qty] of Object.entries(cartObj || {})){
@@ -449,12 +604,28 @@
   /*********************
    * PRODUCTS UI
    *********************/
+  const state = {
+    guestId: null,
+    products: STATIC_PRODUCTS
+  };
+
+  function getGuestId(){
+    let id = localStorage.getItem("guestId");
+    if(!id){
+      id = "guest-" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)));
+      localStorage.setItem("guestId", id);
+    }
+    return id;
+  }
+
   function loadProductsUI(){
     const cats = Array.from(new Set(state.products.map(p=>p.Categorie).filter(Boolean)));
     $("catFilter").innerHTML =
       `<option value="">Toutes catégories</option>` + cats.map(c=>`<option>${c}</option>`).join("");
+
     $("catFilter").onchange = renderProducts;
     $("search").oninput = renderProducts;
+
     renderProducts();
   }
 
@@ -471,28 +642,46 @@
 
     const box = $("products");
     if(list.length===0){
-      box.innerHTML = `<div class="muted" style="padding:14px">Aucun produit trouvé.</div>`;
+      box.innerHTML = `<div class="loading">Aucun produit trouvé.</div>`;
       return;
     }
 
-    box.innerHTML = list.map(p=>`
-      <div class="prod">
-        <div class="row" style="align-items:flex-start">
-          <div style="min-width:0">
-            <div class="title">${p.Nom||""}</div>
-            <div class="desc">${p.Description||""}</div>
-          </div>
-          <div class="price">${moneyHTG(p.Prix)}</div>
-        </div>
+    box.innerHTML = list.map(p=>{
+      const img = safeImgUrl(p.Image);
+      const thumb = img
+        ? `<img src="${img}" alt="${(p.Nom||"").replace(/"/g,"")}"
+              onerror="this.remove(); this.parentNode.textContent='BES';">`
+        : `BES`;
 
-        <div style="margin-top:10px">
-          <button class="btn btnAdd" type="button"
-            onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">
-            Ajouter au panier
-          </button>
+      const badgeClass = (p.Categorie === "Dessert") ? "badge pink" : "badge green";
+
+      return `
+        <div class="prod">
+          <div class="prodTop">
+            <div class="thumb">${thumb}</div>
+            <div style="flex:1;min-width:0">
+              <div class="row" style="align-items:flex-start">
+                <div style="min-width:0">
+                  <div class="title">${p.Nom||""}</div>
+                  <div class="desc">${p.Description||""}</div>
+                </div>
+                <div class="price">${fmtHTG(p.Prix)}</div>
+              </div>
+              <div class="badges">
+                <span class="${badgeClass}">${p.Categorie||""}</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <button class="btn btnAdd" type="button"
+              onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">
+              Ajouter au panier
+            </button>
+          </div>
         </div>
-      </div>
-    `).join("");
+      `;
+    }).join("");
   }
 
   /*********************
@@ -503,11 +692,10 @@
     const items = cartToItems(cart);
     const total = cartTotal(cart);
 
-    $("total").textContent = moneyHTG(total);
+    $("total").textContent = fmtHTG(total);
 
     if(items.length === 0){
       $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
-      validateCheckoutBtn();
       return;
     }
 
@@ -517,8 +705,9 @@
         <div class="cartItem">
           <div style="flex:1;min-width:0">
             <div class="name">${it.Nom||""}</div>
-            <div class="sub">${moneyHTG(it.Prix)} × ${Number(it.Quantite||0)} = <b>${moneyHTG(sub)}</b></div>
+            <div class="sub">${fmtHTG(it.Prix)} × ${Number(it.Quantite||0)} = <b>${fmtHTG(sub)}</b></div>
           </div>
+
           <div class="miniBtns">
             <button class="mini" type="button" onclick="qty('${it.ProductID}', ${Number(it.Quantite||1)-1})">−</button>
             <button class="mini" type="button" onclick="qty('${it.ProductID}', ${Number(it.Quantite||1)+1})">+</button>
@@ -529,206 +718,151 @@
       `;
     }).join("");
 
-    validateCheckoutBtn();
+    validateCheckoutButton();
   }
 
   window.addToCart = function(productId){
-    hideErr(); clearToast();
+    hideErr();
+    clearToast();
+
     const cart = loadCart();
     const pid = String(productId);
     cart[pid] = (Number(cart[pid]||0) + 1);
     saveCart(cart);
+
     renderCart();
     toast("Ajouté au panier ✅");
     setTimeout(clearToast, 900);
   }
 
   window.qty = function(productId, q){
-    hideErr(); clearToast();
+    hideErr();
+    clearToast();
+
     const cart = loadCart();
     const pid = String(productId);
     const next = Number(q||0);
-    if(next <= 0) delete cart[pid];
-    else cart[pid] = next;
+
+    if(next <= 0){
+      delete cart[pid];
+    }else{
+      cart[pid] = next;
+    }
     saveCart(cart);
     renderCart();
   }
 
   window.rm = function(productId){
-    hideErr(); clearToast();
+    hideErr();
+    clearToast();
+
     const cart = loadCart();
     delete cart[String(productId)];
     saveCart(cart);
     renderCart();
   }
 
-  /*********************
-   * PAYMENT + IMAGE REQUIRED (local only)
-   *********************/
-  function getPaymentMethod(){
-    const el = document.querySelector('input[name="paymentMethod"]:checked');
-    return el ? String(el.value) : "";
+  function setBusy(isBusy){
+    const card = $("cartCard");
+    if(isBusy) card.classList.add("dim");
+    else card.classList.remove("dim");
   }
 
-  function validateCheckoutBtn(){
+  /*********************
+   * Paiement + image obligatoire
+   *********************/
+  function getSelectedPaymentMethod(){
+    const el = document.querySelector("input[name='pay']:checked");
+    return el ? String(el.value || "").trim() : "";
+  }
+
+  function hasProofImage(){
+    const f = $("paymentProof").files;
+    return !!(f && f.length > 0);
+  }
+
+  function validateCheckoutButton(){
     const cart = loadCart();
     const items = cartToItems(cart);
     const total = cartTotal(cart);
 
+    const paymentMethod = getSelectedPaymentMethod();
+    const proof = hasProofImage();
+
     const nameOk = !!$("clientNom").value.trim();
     const phoneOk = !!$("telephone").value.trim();
 
-    const isLiv = (norm($("typeCommande").value) === "livraison");
+    const t = norm($("typeCommande").value);
+    const isLiv = (t === "livraison");
     const addrOk = !isLiv || !!$("adresse").value.trim();
 
-    const methodOk = !!getPaymentMethod();
-    const refOk = !!$("paymentRef").value.trim();
+    const ok = (items.length > 0 && total > 0 && nameOk && phoneOk && addrOk && paymentMethod && proof);
 
-    // ✅ image obligatoire, mais pas envoyée
-    const proofOk = !!state.proofSelected;
-
-    const cartOk = items.length > 0 && total > 0;
-
-    $("checkoutBtn").disabled = !(cartOk && nameOk && phoneOk && addrOk && methodOk && refOk && proofOk);
-  }
-
-  function bindPaymentEvents(){
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(r=>{
-      r.addEventListener("change", validateCheckoutBtn);
-    });
-
-    $("clientNom").addEventListener("input", validateCheckoutBtn);
-    $("telephone").addEventListener("input", validateCheckoutBtn);
-    $("adresse").addEventListener("input", validateCheckoutBtn);
-    $("paymentRef").addEventListener("input", validateCheckoutBtn);
-
-    $("paymentProof").addEventListener("change", ()=>{
-      hideErr(); clearToast();
-      state.proofSelected = false;
-
-      const f = $("paymentProof").files && $("paymentProof").files[0];
-      if(!f){
-        $("proofPreview").style.display="none";
-        validateCheckoutBtn();
-        return;
-      }
-
-      // optionnel: limite taille juste pour éviter images énormes
-      const maxMB = 8;
-      if (f.size > maxMB * 1024 * 1024) {
-        showErr("Image trop grande. Maximum " + maxMB + "MB.");
-        $("paymentProof").value = "";
-        $("proofPreview").style.display="none";
-        validateCheckoutBtn();
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(){
-        $("proofImg").src = String(reader.result || "");
-        $("proofPreview").style.display = "block";
-        state.proofSelected = true;
-        validateCheckoutBtn();
-      };
-      reader.onerror = function(){
-        showErr("Impossible de lire l'image.");
-        $("paymentProof").value = "";
-        $("proofPreview").style.display="none";
-        validateCheckoutBtn();
-      };
-      reader.readAsDataURL(f);
-    });
+    $("checkoutBtn").disabled = !ok;
+    $("proofOk").style.display = proof ? "block" : "none";
   }
 
   /*********************
-   * JSONP → Apps Script (no image)
-   *********************/
-  function apiJsonp(action, params = {}) {
-    return new Promise((resolve, reject) => {
-      const cb = "cb_" + Math.random().toString(16).slice(2);
-      const q = new URLSearchParams({ action, callback: cb, ...params }).toString();
-
-      const s = document.createElement("script");
-      s.src = API_URL + "?" + q;
-      s.async = true;
-
-      window[cb] = (data) => {
-        try { resolve(data); }
-        finally {
-          delete window[cb];
-          s.remove();
-        }
-      };
-
-      s.onerror = () => {
-        delete window[cb];
-        s.remove();
-        reject(new Error("API error / network"));
-      };
-
-      document.head.appendChild(s);
-    });
-  }
-
-  /*********************
-   * WhatsApp message
+   * WhatsApp message (sans attacher image)
    *********************/
   function openWhatsApp(message){
-    if(!WHATSAPP_NUMBER || WHATSAPP_NUMBER.includes("X")){
-      throw new Error("WHATSAPP_NUMBER non configuré.");
-    }
     const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank");
   }
 
-  function buildWhatsAppMessage(payload, totalHTG, items){
-    const lines = [];
-    lines.push("🍔 BES FAST FOOD – NOUVELLE COMMANDE");
-    lines.push("");
-    lines.push("👤 Nom: " + payload.clientNom);
-    lines.push("📞 Téléphone: " + payload.telephone);
-    lines.push("");
-    lines.push("🛍️ Commande:");
-    items.forEach(it=>{
-      lines.push("- " + it.Nom + " x" + it.Quantite + " = " + moneyHTG(it.Prix * it.Quantite));
+  function buildWhatsAppMessage(payload, cartItems, total){
+    let msg = "🍔 BES FAST FOOD – NOUVELLE COMMANDE\n\n";
+    msg += "👤 Nom : " + payload.clientNom + "\n";
+    msg += "📞 Téléphone : " + payload.telephone + "\n\n";
+    msg += "🛍️ Commande :\n";
+
+    cartItems.forEach(it=>{
+      const p = STATIC_PRODUCTS.find(x => String(x.ProductID) === String(it.ProductID));
+      const name = p ? p.Nom : ("Produit " + it.ProductID);
+      const price = p ? Number(p.Prix||0) : 0;
+      const sub = price * Number(it.Quantite||0);
+      msg += "- " + name + " x" + it.Quantite + " = " + fmtHTG(sub) + "\n";
     });
-    lines.push("");
-    lines.push("💰 Total: " + totalHTG);
-    lines.push("");
-    lines.push("💳 Paiement: " + payload.paymentMethod);
-    lines.push("🧾 Référence: " + payload.paymentRef);
-    lines.push("");
-    lines.push("📍 Type: " + payload.typeCommande);
-    if(norm(payload.typeCommande)==="livraison"){
-      lines.push("🏠 Adresse: " + (payload.adresse || "-"));
+
+    msg += "\n💰 Total : " + fmtHTG(total) + "\n";
+    msg += "💳 Paiement : " + payload.paymentMethod + "\n\n";
+    msg += "📍 Type : " + payload.typeCommande + "\n";
+    if(norm(payload.typeCommande) === "livraison"){
+      msg += "🏠 Adresse : " + (payload.adresse || "-") + "\n";
     }
     if(payload.noteCommande){
-      lines.push("");
-      lines.push("📝 Note: " + payload.noteCommande);
+      msg += "\n📝 Note : " + payload.noteCommande + "\n";
     }
-    lines.push("");
-    lines.push("✅ Preuve: Merci d'attacher la capture/Photo du paiement dans WhatsApp (image obligatoire).");
-    return lines.join("\n");
+
+    msg += "\n📌 IMPORTANT : Envoie la preuve de paiement (image) dans ce chat WhatsApp ✅";
+    return msg;
   }
 
   /*********************
-   * CHECKOUT: WhatsApp + Store in Sheets (no image)
+   * CHECKOUT (WhatsApp + Sheets sans image)
    *********************/
   async function checkout(){
     try{
-      hideErr(); clearToast();
-
-      if(!API_URL || API_URL.includes("COLLE_ICI")){
-        showErr("API_URL non configuré (colle l'URL Apps Script /exec).");
-        return;
-      }
+      hideErr();
+      clearToast();
 
       const cart = loadCart();
-      const items = cartToItems(cart);
+      const items = cartToItems(cart).map(it => ({ ProductID: it.ProductID, Quantite: it.Quantite }));
       const total = cartTotal(cart);
 
       if(items.length === 0 || total <= 0){
         showErr("Panier vide.");
+        return;
+      }
+
+      const paymentMethod = getSelectedPaymentMethod();
+      if(!paymentMethod){
+        showErr("Choisis une méthode de paiement.");
+        return;
+      }
+
+      if(!hasProofImage()){
+        showErr("Preuve de paiement obligatoire (image).");
         return;
       }
 
@@ -739,9 +873,8 @@
         typeCommande: $("typeCommande").value,
         adresse: $("adresse").value.trim(),
         noteCommande: $("noteCommande").value.trim(),
-        items: items.map(it => ({ ProductID: it.ProductID, Quantite: it.Quantite })),
-        paymentMethod: getPaymentMethod(),
-        paymentRef: $("paymentRef").value.trim()
+        paymentMethod: paymentMethod,
+        items: items
       };
 
       if(!payload.clientNom || !payload.telephone){
@@ -752,53 +885,44 @@
         showErr("Adresse obligatoire pour la livraison.");
         return;
       }
-      if(!payload.paymentMethod){
-        showErr("Choisis une méthode de paiement.");
-        return;
-      }
-      if(!payload.paymentRef){
-        showErr("Entre la référence de paiement.");
-        return;
-      }
-      if(!state.proofSelected){
-        showErr("Ajoute une preuve de paiement (image).");
-        return;
-      }
 
-      // ✅ 1) Ouvrir WhatsApp d’abord (évite popup blocker)
-      const waMsg = buildWhatsAppMessage(payload, moneyHTG(total), items);
+      // ✅ 1) Ouvrir WhatsApp (pas d'attachment possible par lien)
+      const waMsg = buildWhatsAppMessage(payload, items, total);
       openWhatsApp(waMsg);
 
-      // ✅ 2) Enregistrer sur serveur SANS image
-      // On affiche un toast même si erreur serveur, car WhatsApp est déjà ouvert
-      toast("WhatsApp ouvert ✅ Enregistrement en cours...");
-      $("checkoutBtn").disabled = true;
+      // ✅ 2) Envoyer au serveur (sans image)
+      setBusy(true);
+      let serverOk = false;
+      try{
+        const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
+        if(r && r.ok){
+          serverOk = true;
+          toast("Commande enregistrée ✅ ID: " + r.orderId);
+        }else{
+          toast("WhatsApp ouvert ✅ (Serveur: échec)");
+        }
+      }catch(_e){
+        toast("WhatsApp ouvert ✅ (Erreur serveur)");
+      }
 
-      apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) })
-        .then(r=>{
-          if(r && r.ok){
-            toast("Enregistré ✅ ID: " + r.orderId);
-            clearCart();
-            renderCart();
-            // Optionnel: reset proof
-            $("paymentProof").value = "";
-            $("proofPreview").style.display = "none";
-            state.proofSelected = false;
-            validateCheckoutBtn();
-          } else {
-            toast("WhatsApp OK ✅ (Erreur stockage serveur)");
-          }
-        })
-        .catch(_=>{
-          toast("WhatsApp OK ✅ (Erreur réseau serveur)");
-        })
-        .finally(()=>{
-          $("checkoutBtn").disabled = false;
-          validateCheckoutBtn();
-        });
+      // ✅ Si serveur OK, on vide le panier
+      if(serverOk){
+        clearCart();
+        renderCart();
+        $("noteCommande").value = "";
+        $("adresse").value = "";
+        $("typeCommande").value = "Sur place";
+        syncAddressVisibility();
+        // reset image + paiement
+        $("paymentProof").value = "";
+        document.querySelectorAll("input[name='pay']").forEach(x=> x.checked = false);
+        validateCheckoutButton();
+      }
 
     }catch(e){
       showErr(e.message || e);
+    }finally{
+      setBusy(false);
     }
   }
 
@@ -810,18 +934,26 @@
 
     $("refreshBtn").onclick = renderCart;
     $("checkoutBtn").onclick = checkout;
-    $("typeCommande").onchange = syncAddressVisibility;
+    $("typeCommande").onchange = ()=>{ syncAddressVisibility(); validateCheckoutButton(); };
     $("resetCartBtn").onclick = ()=>{ clearCart(); renderCart(); toast("Panier vidé ✅"); setTimeout(clearToast, 900); };
 
-    bindPaymentEvents();
+    $("clientNom").addEventListener("input", validateCheckoutButton);
+    $("telephone").addEventListener("input", validateCheckoutButton);
+    $("adresse").addEventListener("input", validateCheckoutButton);
+    $("noteCommande").addEventListener("input", validateCheckoutButton);
+
+    document.querySelectorAll("input[name='pay']").forEach(r=>{
+      r.addEventListener("change", validateCheckoutButton);
+    });
+
+    $("paymentProof").addEventListener("change", validateCheckoutButton);
+
     syncAddressVisibility();
     loadProductsUI();
     renderCart();
-
-    validateCheckoutBtn();
+    validateCheckoutButton();
   })();
 </script>
 
 </body>
 </html>
-
