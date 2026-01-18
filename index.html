@@ -192,6 +192,7 @@
     }
     .badge.green{border-color:rgba(46,125,50,.25); color:rgba(46,125,50,.95)}
     .badge.pink{border-color:rgba(211,47,47,.20); color:rgba(211,47,47,.90)}
+    .badge.stock0{border-color:rgba(211,47,47,.25); color:rgba(211,47,47,.95);}
 
     .btn{
       width:100%;
@@ -219,9 +220,7 @@
       cursor:not-allowed;
       filter: grayscale(.25);
     }
-    .btnPrimary:disabled{
-      box-shadow:none !important;
-    }
+    .btnPrimary:disabled{ box-shadow:none !important; }
 
     .cartBody{padding:14px}
     .hr{height:1px; background: rgba(93,64,55,.10); margin:12px 0}
@@ -253,12 +252,6 @@
       border:1px solid rgba(211,47,47,.18);
       padding:2px 8px; border-radius:999px;
     }
-    .opt{
-      font-size:11px; font-weight:1000; color: rgba(46,125,50,.95);
-      background: rgba(46,125,50,.08);
-      border:1px solid rgba(46,125,50,.18);
-      padding:2px 8px; border-radius:999px;
-    }
 
     .toast{
       display:none;
@@ -283,6 +276,7 @@
 
     .dim{ opacity:.65; pointer-events:none; filter:saturate(.9); }
 
+    /* ✅ Paiement: mise en forme corrigée */
     .payBox{
       border:1px solid rgba(93,64,55,.16);
       border-radius:16px;
@@ -291,25 +285,35 @@
     }
     .payRow{
       display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:8px 0;
+      gap:12px;
+      align-items:center; /* ✅ aligné vertical */
+      padding:10px 0;
       border-top:1px dashed rgba(93,64,55,.16);
     }
     .payRow:first-child{ border-top:none; }
-    .payTitle{ font-weight:1000; margin:0; }
+    .payRadio{
+      width:18px; height:18px;
+      accent-color: #111;
+      flex:0 0 auto;
+    }
+    .payText{flex:1; min-width:0}
+    .payTitle{
+      font-weight:1000; margin:0;
+      line-height:1.2;
+      word-break: break-word;
+    }
     .paySub{ font-size:12px; color:var(--muted); margin-top:4px; }
-    .fileHint{ font-size:12px; color:var(--muted); margin-top:6px; }
-    .proofOk{
-      display:none;
-      margin-top:8px;
-      font-size:12px;
+
+    .feeBox{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(93,64,55,.14);
+      background: rgba(255,193,7,.10);
+      font-size:13px;
       font-weight:900;
-      color:rgba(46,125,50,.95);
-      background: rgba(46,125,50,.08);
-      border:1px solid rgba(46,125,50,.22);
-      padding:8px 10px;
-      border-radius:12px;
+      color:#2b1b16;
+      display:none;
     }
   </style>
 </head>
@@ -327,7 +331,7 @@
       </div>
     </div>
 
-    <div class="pill">Commande en ligne • WhatsApp v4 (Sheets)</div>
+    <div class="pill">Commande en ligne • WhatsApp v5 (Sheets + Livraison)</div>
   </div>
 </header>
 
@@ -384,6 +388,9 @@
           <b id="total">0.00 HTG</b>
         </div>
 
+        <!-- ✅ Frais livraison affichés si Livraison -->
+        <div id="feeBox" class="feeBox"></div>
+
         <div class="hr"></div>
 
         <div style="font-weight:1000;margin-bottom:8px">Finaliser</div>
@@ -410,6 +417,13 @@
         <div class="field" id="addrWrap" style="display:none">
           <div class="label">Adresse de livraison <span class="req">Obligatoire</span></div>
           <textarea id="adresse" placeholder="Ex: Rue..., maison..., repère..."></textarea>
+
+          <div class="field" style="margin-top:10px">
+            <div class="label">Zone de livraison <span class="req">Obligatoire</span></div>
+            <select id="zoneLivraison">
+              <option value="">Choisir une zone...</option>
+            </select>
+          </div>
         </div>
 
         <div class="field">
@@ -417,36 +431,26 @@
           <textarea id="noteCommande" placeholder="Ex: sans piment..."></textarea>
         </div>
 
-        <!-- Paiement obligatoire -->
+        <!-- ✅ Paiement obligatoire (mise en forme corrigée) -->
         <div class="field">
           <div class="label">Paiement <span class="req">Obligatoire</span></div>
           <div class="payBox">
             <label class="payRow">
-              <input type="radio" name="pay" value="MonCash" style="margin-top:2px">
-              <div>
+              <input class="payRadio" type="radio" name="pay" value="MonCash">
+              <div class="payText">
                 <div class="payTitle">MonCash — 48094439 — RALJnPIE</div>
                 <div class="paySub">Choisis MonCash si tu as payé sur ce numéro.</div>
               </div>
             </label>
 
             <label class="payRow">
-              <input type="radio" name="pay" value="NatCash" style="margin-top:2px">
-              <div>
+              <input class="payRadio" type="radio" name="pay" value="NatCash">
+              <div class="payText">
                 <div class="payTitle">NatCash — 40430164 — RALJnPIE</div>
                 <div class="paySub">Choisis NatCash si tu as payé sur ce numéro.</div>
               </div>
             </label>
           </div>
-        </div>
-
-        <!-- ✅ preuve image OPTIONNELLE -->
-        <div class="field">
-          <div class="label">Preuve de paiement (image) <span class="opt">Optionnel</span></div>
-          <input id="paymentProof" type="file" accept="image/*">
-          <div class="fileHint">
-            Tu peux envoyer la preuve directement dans WhatsApp après l’envoi de la commande.
-          </div>
-          <div class="proofOk" id="proofOk">✅ Image sélectionnée</div>
         </div>
 
         <div style="margin-top:12px">
@@ -467,15 +471,34 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
   const CART_KEY = "bes_cart_v1";
 
-  const STATIC_PRODUCTS = [
-    { ProductID:"1", Nom:"Cornet (Pack de 6)", Prix:1250, Description:"", Categorie:"Nourriture", Image:"" },
-    { ProductID:"2", Nom:"Gratiné simple",      Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
-    { ProductID:"3", Nom:"Gratiné wings",       Prix:1000, Description:"", Categorie:"Nourriture", Image:"" },
-    { ProductID:"4", Nom:"Wings simple",        Prix:750,  Description:"", Categorie:"Nourriture", Image:"" },
-    { ProductID:"5", Nom:"Cupcake (Pack de 6)", Prix:1500, Description:"", Categorie:"Dessert",    Image:"" },
-    { ProductID:"6", Nom:"Lasagne et wings",    Prix:1500, Description:"", Categorie:"Nourriture", Image:"" }
+  /*********************
+   * ZONES + FRAIS LIVRAISON
+   *********************/
+  const DELIVERY_ZONES = [
+    { key:"Madeline", label:"Centre ville - Madeline", fee:250 },
+    { key:"Barriere Bouteille", label:"Centre ville - Barrière Bouteille", fee:250 },
+    { key:"Haut du Cap", label:"Centre ville - Haut du Cap", fee:350 },
+    { key:"Quartier Morin", label:"Centre ville - Quartier Morin", fee:350 },
+    { key:"Morne rouge", label:"Centre ville - Morne rouge", fee:500 },
+    { key:"Limonade", label:"Centre ville - Limonade", fee:500 }
   ];
 
+  /*********************
+   * PRODUITS (STATIC) ✅ Ajoute Stock
+   * Stock: mets 0 pour cacher automatiquement le produit
+   *********************/
+  const STATIC_PRODUCTS = [
+    { ProductID:"1", Nom:"Cornet (Pack de 6)", Prix:1250, Description:"", Categorie:"Nourriture", Image:"", Stock: 10 },
+    { ProductID:"2", Nom:"Gratiné simple",      Prix:1000, Description:"", Categorie:"Nourriture", Image:"", Stock: 10 },
+    { ProductID:"3", Nom:"Gratiné wings",       Prix:1000, Description:"", Categorie:"Nourriture", Image:"", Stock: 10 },
+    { ProductID:"4", Nom:"Wings simple",        Prix:750,  Description:"", Categorie:"Nourriture", Image:"", Stock: 10 },
+    { ProductID:"5", Nom:"Cupcake (Pack de 6)", Prix:1500, Description:"", Categorie:"Dessert",    Image:"", Stock: 10 },
+    { ProductID:"6", Nom:"Lasagne et wings",    Prix:1500, Description:"", Categorie:"Nourriture", Image:"", Stock: 10 }
+  ];
+
+  /*********************
+   * HELPERS
+   *********************/
   const $ = (id)=>document.getElementById(id);
   function norm(s){ return String(s||"").toLowerCase().trim(); }
   function fmtHTG(n){
@@ -505,13 +528,9 @@
     t.textContent="";
   }
 
-  function syncAddressVisibility(){
-    const t = norm($("typeCommande").value);
-    const isLiv = (t === "livraison");
-    $("addrWrap").style.display = isLiv ? "block" : "none";
-    if(!isLiv) $("adresse").value = "";
-  }
-
+  /*********************
+   * JSONP vers Apps Script (anti CORS)
+   *********************/
   function apiJsonp(action, params = {}) {
     return new Promise((resolve, reject) => {
       const cb = "cb_" + Math.random().toString(16).slice(2);
@@ -553,6 +572,9 @@
     });
   }
 
+  /*********************
+   * LOCAL CART
+   *********************/
   function loadCart(){
     try{
       const raw = localStorage.getItem(CART_KEY);
@@ -569,6 +591,9 @@
     for(const [pid, qty] of Object.entries(cartObj || {})){
       const p = STATIC_PRODUCTS.find(x => String(x.ProductID) === String(pid));
       if(!p) continue;
+      // ✅ si stock 0 => ne pas mettre dans panier (sécurité)
+      if(Number(p.Stock||0) <= 0) continue;
+
       items.push({
         ProductID: String(pid),
         Nom: p.Nom,
@@ -579,16 +604,61 @@
     return items;
   }
 
-  function cartTotal(cartObj){
+  function cartSubtotal(cartObj){
     let total = 0;
     for(const [pid, qty] of Object.entries(cartObj || {})){
       const p = STATIC_PRODUCTS.find(x => String(x.ProductID) === String(pid));
       if(!p) continue;
+      if(Number(p.Stock||0) <= 0) continue;
       total += Number(p.Prix||0) * Math.max(1, Number(qty||1));
     }
     return total;
   }
 
+  /*********************
+   * DELIVERY helpers
+   *********************/
+  function isLivraison(){
+    return norm($("typeCommande").value) === "livraison";
+  }
+  function getSelectedZone(){
+    const key = String($("zoneLivraison").value || "").trim();
+    return DELIVERY_ZONES.find(z => z.key === key) || null;
+  }
+  function getDeliveryFee(){
+    if(!isLivraison()) return 0;
+    const z = getSelectedZone();
+    return z ? Number(z.fee||0) : 0;
+  }
+  function updateFeeBox(){
+    const box = $("feeBox");
+    if(!isLivraison()){
+      box.style.display = "none";
+      box.textContent = "";
+      return;
+    }
+    const z = getSelectedZone();
+    if(!z){
+      box.style.display = "block";
+      box.textContent = "🚚 Frais de livraison : choisissez une zone.";
+      return;
+    }
+    box.style.display = "block";
+    box.textContent = `🚚 Frais de livraison (${z.label}) : ${fmtHTG(z.fee)}`;
+  }
+
+  function syncAddressVisibility(){
+    $("addrWrap").style.display = isLivraison() ? "block" : "none";
+    if(!isLivraison()){
+      $("adresse").value = "";
+      $("zoneLivraison").value = "";
+    }
+    updateFeeBox();
+  }
+
+  /*********************
+   * PRODUCTS UI
+   *********************/
   const state = { guestId: null, products: STATIC_PRODUCTS };
 
   function getGuestId(){
@@ -600,19 +670,36 @@
     return id;
   }
 
+  function loadZonesUI(){
+    $("zoneLivraison").innerHTML =
+      `<option value="">Choisir une zone...</option>` +
+      DELIVERY_ZONES.map(z => `<option value="${z.key}">${z.label} — ${fmtHTG(z.fee)}</option>`).join("");
+  }
+
   function loadProductsUI(){
-    const cats = Array.from(new Set(state.products.map(p=>p.Categorie).filter(Boolean)));
+    // ✅ catégories uniquement des produits en stock
+    const cats = Array.from(new Set(
+      state.products
+        .filter(p => Number(p.Stock||0) > 0)
+        .map(p=>p.Categorie)
+        .filter(Boolean)
+    ));
     $("catFilter").innerHTML =
       `<option value="">Toutes catégories</option>` + cats.map(c=>`<option>${c}</option>`).join("");
+
     $("catFilter").onchange = renderProducts;
     $("search").oninput = renderProducts;
+
     renderProducts();
   }
 
   function renderProducts(){
     const cat = $("catFilter").value;
     const q = norm($("search").value);
+
+    // ✅ filtrer stock > 0
     const list = state.products.filter(p => {
+      if(Number(p.Stock||0) <= 0) return false;
       const okCat = (!cat || String(p.Categorie) === String(cat));
       const hay = norm(p.Nom) + " " + norm(p.Description) + " " + norm(p.Categorie);
       const okQ = (!q || hay.includes(q));
@@ -621,12 +708,13 @@
 
     const box = $("products");
     if(list.length===0){
-      box.innerHTML = `<div class="muted" style="padding:14px">Aucun produit trouvé.</div>`;
+      box.innerHTML = `<div class="muted" style="padding:14px">Aucun produit disponible.</div>`;
       return;
     }
 
     box.innerHTML = list.map(p=>{
       const badgeClass = (p.Categorie === "Dessert") ? "badge pink" : "badge green";
+
       return `
         <div class="prod">
           <div class="prodTop">
@@ -644,8 +732,10 @@
               </div>
             </div>
           </div>
+
           <div style="margin-top:10px">
-            <button class="btn btnAdd" type="button" onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">
+            <button class="btn btnAdd" type="button"
+              onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">
               Ajouter au panier
             </button>
           </div>
@@ -654,12 +744,18 @@
     }).join("");
   }
 
+  /*********************
+   * CART UI
+   *********************/
   function renderCart(){
     const cart = loadCart();
     const items = cartToItems(cart);
-    const total = cartTotal(cart);
+    const subTotal = cartSubtotal(cart);
+    const fee = getDeliveryFee();
+    const total = subTotal + fee;
 
     $("total").textContent = fmtHTG(total);
+    updateFeeBox();
 
     if(items.length === 0){
       $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
@@ -675,6 +771,7 @@
             <div class="name">${it.Nom||""}</div>
             <div class="sub">${fmtHTG(it.Prix)} × ${Number(it.Quantite||0)} = <b>${fmtHTG(sub)}</b></div>
           </div>
+
           <div class="miniBtns">
             <button class="mini" type="button" onclick="qty('${it.ProductID}', ${Number(it.Quantite||1)-1})">−</button>
             <button class="mini" type="button" onclick="qty('${it.ProductID}', ${Number(it.Quantite||1)+1})">+</button>
@@ -690,10 +787,19 @@
 
   window.addToCart = function(productId){
     hideErr(); clearToast();
+
+    const p = STATIC_PRODUCTS.find(x => String(x.ProductID) === String(productId));
+    if(!p || Number(p.Stock||0) <= 0){
+      toast("Produit indisponible (stock 0).");
+      setTimeout(clearToast, 1200);
+      return;
+    }
+
     const cart = loadCart();
     const pid = String(productId);
     cart[pid] = (Number(cart[pid]||0) + 1);
     saveCart(cart);
+
     renderCart();
     toast("Ajouté au panier ✅");
     setTimeout(clearToast, 900);
@@ -704,8 +810,10 @@
     const cart = loadCart();
     const pid = String(productId);
     const next = Number(q||0);
+
     if(next <= 0) delete cart[pid];
     else cart[pid] = next;
+
     saveCart(cart);
     renderCart();
   }
@@ -722,57 +830,64 @@
     const card = $("cartCard");
     if(isBusy) card.classList.add("dim");
     else card.classList.remove("dim");
+    $("checkoutBtn").disabled = isBusy || $("checkoutBtn").disabled;
   }
 
+  /*********************
+   * Paiement obligatoire
+   *********************/
   function getSelectedPaymentMethod(){
     const el = document.querySelector("input[name='pay']:checked");
     return el ? String(el.value || "").trim() : "";
   }
 
-  // ✅ preuve maintenant OPTIONNELLE
-  function hasProofImage(){
-    const f = $("paymentProof").files;
-    return !!(f && f.length > 0);
-  }
-
-  // ✅ bouton : preuve NON requise
+  /*********************
+   * VALIDATION + TOTAL
+   *********************/
   function validateCheckoutButton(){
     const cart = loadCart();
     const items = cartToItems(cart);
-    const total = cartTotal(cart);
+    const subTotal = cartSubtotal(cart);
 
     const paymentMethod = getSelectedPaymentMethod();
     const nameOk = !!$("clientNom").value.trim();
     const phoneOk = !!$("telephone").value.trim();
 
-    const t = norm($("typeCommande").value);
-    const isLiv = (t === "livraison");
-    const addrOk = !isLiv || !!$("adresse").value.trim();
+    const liv = isLivraison();
+    const addrOk = !liv || !!$("adresse").value.trim();
+    const zoneOk = !liv || !!$("zoneLivraison").value.trim();
 
-    const ok = (items.length > 0 && total > 0 && nameOk && phoneOk && addrOk && paymentMethod);
+    const ok = (items.length > 0 && subTotal > 0 && nameOk && phoneOk && paymentMethod && addrOk && zoneOk);
 
     $("checkoutBtn").disabled = !ok;
-    $("proofOk").style.display = hasProofImage() ? "block" : "none";
   }
 
+  /*********************
+   * WhatsApp message
+   *********************/
   function openWhatsApp(message){
     const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
     window.open(url, "_blank");
   }
 
-  function buildWhatsAppMessage(payload, cartItems, total, proofSelected){
+  function buildWhatsAppMessage(payload){
     let msg = "🍔 BES FAST FOOD – NOUVELLE COMMANDE\n\n";
     msg += "👤 Nom : " + payload.clientNom + "\n";
     msg += "📞 Téléphone : " + payload.telephone + "\n\n";
     msg += "🛍️ Commande :\n";
 
-    cartItems.forEach(it=>{
+    payload.items.forEach(it=>{
       const sub = Number(it.Prix||0) * Number(it.Quantite||0);
       msg += "- " + it.Nom + " x" + it.Quantite + " = " + fmtHTG(sub) + "\n";
     });
 
-    msg += "\n💰 Total : " + fmtHTG(total) + "\n";
+    msg += "\n🧾 Sous-total : " + fmtHTG(payload.subTotal) + "\n";
+    if(payload.deliveryFee > 0){
+      msg += "🚚 Livraison (" + (payload.deliveryZoneLabel || payload.deliveryZone || "-") + ") : " + fmtHTG(payload.deliveryFee) + "\n";
+    }
+    msg += "💰 Total : " + fmtHTG(payload.total) + "\n";
     msg += "💳 Paiement : " + payload.paymentMethod + "\n\n";
+
     msg += "📍 Type : " + payload.typeCommande + "\n";
     if(norm(payload.typeCommande) === "livraison"){
       msg += "🏠 Adresse : " + (payload.adresse || "-") + "\n";
@@ -781,22 +896,23 @@
       msg += "\n📝 Note : " + payload.noteCommande + "\n";
     }
 
-    msg += "\n📌 IMPORTANT : Envoie la preuve de paiement (image) dans ce chat WhatsApp ✅";
-    if(proofSelected){
-      msg += "\n(✅ tu as déjà sélectionné une image sur le site, envoie-la ici maintenant)";
-    }
     return msg;
   }
 
+  /*********************
+   * CHECKOUT (WhatsApp + Sheets)
+   * ✅ Après envoi : vider panier + reset => évite double commande
+   *********************/
   async function checkout(){
     try{
       hideErr(); clearToast();
+      $("checkoutBtn").disabled = true; // ✅ éviter double clic
 
       const cart = loadCart();
       const itemsFull = cartToItems(cart);
-      const total = cartTotal(cart);
+      const subTotal = cartSubtotal(cart);
 
-      if(itemsFull.length === 0 || total <= 0){
+      if(itemsFull.length === 0 || subTotal <= 0){
         showErr("Panier vide.");
         return;
       }
@@ -807,6 +923,21 @@
         return;
       }
 
+      const liv = isLivraison();
+      const zone = liv ? getSelectedZone() : null;
+      const deliveryFee = liv ? (zone ? Number(zone.fee||0) : 0) : 0;
+
+      if(liv && !zone){
+        showErr("Choisis une zone de livraison.");
+        return;
+      }
+      if(liv && !$("adresse").value.trim()){
+        showErr("Adresse obligatoire pour la livraison.");
+        return;
+      }
+
+      const total = subTotal + deliveryFee;
+
       const payload = {
         guestId: state.guestId,
         clientNom: $("clientNom").value.trim(),
@@ -815,9 +946,11 @@
         adresse: $("adresse").value.trim(),
         noteCommande: $("noteCommande").value.trim(),
         paymentMethod: paymentMethod,
+        subTotal: subTotal,
+        deliveryFee: deliveryFee,
+        deliveryZone: zone ? zone.key : "",
+        deliveryZoneLabel: zone ? zone.label : "",
         total: total,
-        // ✅ on enregistre seulement un indicateur (pas l’image)
-        proofSelected: hasProofImage() ? "OUI" : "NON",
         items: itemsFull.map(it => ({
           ProductID: it.ProductID,
           Nom: it.Nom,
@@ -830,17 +963,13 @@
         showErr("Nom et téléphone obligatoires.");
         return;
       }
-      if(norm(payload.typeCommande) === "livraison" && !payload.adresse){
-        showErr("Adresse obligatoire pour la livraison.");
-        return;
-      }
 
       setBusy(true);
 
       // 1) WhatsApp
-      openWhatsApp(buildWhatsAppMessage(payload, itemsFull, total, hasProofImage()));
+      openWhatsApp(buildWhatsAppMessage(payload));
 
-      // 2) Sheets (sans image)
+      // 2) Sheets
       let serverOk = false;
       try{
         const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
@@ -854,19 +983,19 @@
         toast("WhatsApp ouvert ✅ (Erreur Sheets)");
       }
 
-      if(serverOk){
-        clearCart();
-        renderCart();
-        $("noteCommande").value = "";
-        $("adresse").value = "";
-        $("typeCommande").value = "Sur place";
-        syncAddressVisibility();
+      // ✅ Dans tous les cas: on vide le panier + reset pour éviter le “bouton déjà pressé”
+      clearCart();
+      renderCart();
 
-        // reset UI preuve (optionnelle)
-        $("paymentProof").value = "";
-        document.querySelectorAll("input[name='pay']").forEach(x=> x.checked = false);
-        validateCheckoutButton();
-      }
+      $("clientNom").value = "";
+      $("telephone").value = "";
+      $("noteCommande").value = "";
+      $("adresse").value = "";
+      $("typeCommande").value = "Sur place";
+      $("zoneLivraison").value = "";
+      document.querySelectorAll("input[name='pay']").forEach(x=> x.checked = false);
+      syncAddressVisibility();
+      validateCheckoutButton();
 
       setTimeout(clearToast, 4500);
 
@@ -874,17 +1003,30 @@
       showErr(e.message || e);
     }finally{
       setBusy(false);
+      validateCheckoutButton(); // recalculer le bouton
     }
   }
 
+  /*********************
+   * BOOT
+   *********************/
   (function(){
     state.guestId = getGuestId();
 
+    loadZonesUI();
+
     $("refreshBtn").onclick = renderCart;
     $("checkoutBtn").onclick = checkout;
+    $("typeCommande").onchange = ()=>{ syncAddressVisibility(); renderCart(); validateCheckoutButton(); };
 
-    $("typeCommande").onchange = ()=>{ syncAddressVisibility(); validateCheckoutButton(); };
-    $("resetCartBtn").onclick = ()=>{ clearCart(); renderCart(); toast("Panier vidé ✅"); setTimeout(clearToast, 900); };
+    $("zoneLivraison").onchange = ()=>{ updateFeeBox(); renderCart(); validateCheckoutButton(); };
+
+    $("resetCartBtn").onclick = ()=>{
+      clearCart();
+      renderCart();
+      toast("Panier vidé ✅");
+      setTimeout(clearToast, 900);
+    };
 
     $("clientNom").addEventListener("input", validateCheckoutButton);
     $("telephone").addEventListener("input", validateCheckoutButton);
@@ -894,8 +1036,6 @@
     document.querySelectorAll("input[name='pay']").forEach(r=>{
       r.addEventListener("change", validateCheckoutButton);
     });
-
-    $("paymentProof").addEventListener("change", validateCheckoutButton);
 
     syncAddressVisibility();
     loadProductsUI();
