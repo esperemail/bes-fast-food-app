@@ -523,56 +523,57 @@ window.printPOS80 = function(order){
         }).join("")
       : `<tr><td colspan="3">${escapeHtml(resume)}</td></tr>`;
 
+    window.printPOS80 = function(order){
+  try{
     const w = window.open("", "_blank", "width=420,height=800");
+
     w.document.write(`<!doctype html>
-<html><head><meta charset="utf-8"/>
+<html>
+<head>
+<meta charset="utf-8">
 <title>POS 80mm</title>
 <style>
-  @page { size: 80mm auto; margin: 6mm; }
-  body{ width:80mm; margin:0; font-family: Arial, sans-serif; color:#000; }
-  .center{text-align:center}
-  .muted{color:#444;font-size:11px}
-  h1{font-size:16px;margin:0;font-weight:800}
-  .hr{border-top:1px dashed #000;margin:8px 0}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  td{padding:4px 0;vertical-align:top}
-  td.name{width:60%}
-  td.qty{width:10%;text-align:right}
-  td.amt{width:30%;text-align:right}
-  .tot{font-size:14px;font-weight:800;text-align:right;margin-top:8px}
-  .small{font-size:11px}
+@page { size: 80mm auto; margin: 6mm; }
+body{ width:80mm; font-family:Arial,sans-serif; margin:0; color:#000; }
+h1{text-align:center;font-size:16px;margin:0}
+.hr{border-top:1px dashed #000;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td{padding:4px 0}
+.right{text-align:right}
 </style>
 </head>
 <body>
-  <div class="center">
-    <h1>BES FAST FOOD</h1>
-    <div class="muted small">${escapeHtml(order.DateHeure||"")}</div>
-  </div>
 
-  <div class="hr"></div>
+<h1>BES FAST FOOD</h1>
+<div class="hr"></div>
 
-  <div class="small"><b>Client:</b> ${escapeHtml(order.ClientNom||"")}</div>
-  <div class="small"><b>Tél:</b> ${escapeHtml(order.Telephone||"")}</div>
-  <div class="small"><b>Type:</b> ${escapeHtml(order.TypeCommande||"")}</div>
-  ${order.Adresse ? `<div class="small"><b>Adresse:</b> ${escapeHtml(order.Adresse||"")}</div>` : ``}
+<b>Client:</b> ${order.ClientNom}<br>
+<b>Tél:</b> ${order.Telephone}<br>
+<b>Type:</b> ${order.TypeCommande}<br>
 
-  <div class="hr"></div>
+<div class="hr"></div>
 
-  <table><tbody>${rows}</tbody></table>
+${order.ResumeItems}
 
-  <div class="hr"></div>
-  <div class="tot">TOTAL: ${fmtHTG(order.Total||0)}</div>
+<div class="hr"></div>
+<b>Total:</b> ${order.Total} HTG
 
-  <div class="hr"></div>
-  <div class="center muted small">Merci d'avoir choisi BES Fast Food!</div>
+<div class="hr"></div>
+Merci d'avoir choisi BES Fast Food
 
-  <script>window.onload=function(){window.print();};<\/script>
-</body></html>`);
+<script>
+window.onload = function(){ window.print(); };
+<\/script>
+
+</body>
+</html>`);
+
     w.document.close();
   }catch(e){
-    showErr("Impression: " + (e.message || e));
+    alert("Erreur impression: " + e.message);
   }
 };
+
 
 /***************
  * Products
