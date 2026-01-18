@@ -188,7 +188,7 @@
               <button class="btn" id="reloadProductsBtn" type="button">Recharger</button>
             </div>
           </div>
-          <div class="content" id="productsBox" class="muted">Chargement…</div>
+          <div class="content" id="productsBox">Chargement…</div>
         </div>
       </section>
 
@@ -278,7 +278,7 @@
 /***************
  * CONFIG
  ***************/
-const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec"; // <-- Mets ton lien /exec ici
+const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
 const DEFAULT_COUNTRY_CODE = "509";
 
 /***************
@@ -286,8 +286,8 @@ const DEFAULT_COUNTRY_CODE = "509";
  ***************/
 function apiJsonp(action, params = {}) {
   return new Promise((resolve, reject) => {
-    if(!API_URL || API_URL.includes("PASTE_")){
-      reject(new Error("API_URL manquant. Mets ton lien Apps Script /exec dans API_URL."));
+    if(!API_URL){
+      reject(new Error("API_URL manquant."));
       return;
     }
     const cb = "cb_" + Math.random().toString(16).slice(2);
@@ -507,7 +507,7 @@ window.readyTakeaway = async function(order){
 };
 
 /***************
- * Print POS 80mm (✅ correction: </script> => <\/script>)
+ * Print POS 80mm (✅ SAFE)
  ***************/
 window.printPOS80 = function(order){
   try{
@@ -519,14 +519,11 @@ window.printPOS80 = function(order){
           const name = escapeHtml(i.Nom||"");
           const q = Number(i.Quantite||0);
           const st = fmtHTG(i.SousTotal||0);
-          return `<tr><td class="name">${name}</td><td class="qty">${q}</td><td class="amt">${st}</td></tr>`;
+          return `<tr><td>${name}</td><td class="right">${q}</td><td class="right">${st}</td></tr>`;
         }).join("")
-      : `<tr><td colspan="3">${escapeHtml(resume)}</td></tr>`;
+      : `<tr><td colspan="3">${escapeHtml(resume || "-")}</td></tr>`;
 
-    window.printPOS80 = function(order){
-  try{
     const w = window.open("", "_blank", "width=420,height=800");
-
     w.document.write(`<!doctype html>
 <html>
 <head>
@@ -536,44 +533,49 @@ window.printPOS80 = function(order){
 @page { size: 80mm auto; margin: 6mm; }
 body{ width:80mm; font-family:Arial,sans-serif; margin:0; color:#000; }
 h1{text-align:center;font-size:16px;margin:0}
+.small{font-size:12px}
 .hr{border-top:1px dashed #000;margin:8px 0}
 table{width:100%;border-collapse:collapse;font-size:12px}
-td{padding:4px 0}
+td{padding:3px 0}
 .right{text-align:right}
 </style>
 </head>
 <body>
-
 <h1>BES FAST FOOD</h1>
-<div class="hr"></div>
-
-<b>Client:</b> ${order.ClientNom}<br>
-<b>Tél:</b> ${order.Telephone}<br>
-<b>Type:</b> ${order.TypeCommande}<br>
-
-<div class="hr"></div>
-
-${order.ResumeItems}
+<div class="small">
+<b>Client:</b> ${escapeHtml(order.ClientNom||"")}<br>
+<b>Tél:</b> ${escapeHtml(order.Telephone||"")}<br>
+<b>Type:</b> ${escapeHtml(order.TypeCommande||"")}<br>
+<b>Date:</b> ${escapeHtml(order.DateHeure||"")}
+</div>
 
 <div class="hr"></div>
-<b>Total:</b> ${order.Total} HTG
+
+<table>
+<tr><td><b>Article</b></td><td class="right"><b>Qté</b></td><td class="right"><b>Montant</b></td></tr>
+${rows}
+</table>
 
 <div class="hr"></div>
-Merci d'avoir choisi BES Fast Food
+<div class="small">
+<b>Total:</b> ${fmtHTG(order.Total||0)}<br>
+<b>Statut:</b> ${escapeHtml(order.Statut||"-")}
+</div>
+
+<div class="hr"></div>
+<div class="small" style="text-align:center">Merci d'avoir choisi BES Fast Food</div>
 
 <script>
 window.onload = function(){ window.print(); };
 <\/script>
-
 </body>
 </html>`);
-
     w.document.close();
+
   }catch(e){
-    alert("Erreur impression: " + e.message);
+    showErr("Impression: " + (e.message || e));
   }
 };
-
 
 /***************
  * Products
@@ -614,7 +616,6 @@ async function loadProducts(){
     $("productsBox").textContent = "Erreur.";
   }
 }
-
 $("reloadProductsBtn").addEventListener("click", loadProducts);
 
 /***************
@@ -676,7 +677,8 @@ window.placeRm = function(pid){
   renderPlaceCart();
 };
 window.placeAdd = function(pid){
-  placeCart[String(pid)] = (Number(placeCart[String(pid)]||0) + 1);
+  const k = String(pid);
+  placeCart[k] = (Number(placeCart[k]||0) + 1);
   renderPlaceCart();
 };
 
@@ -724,7 +726,6 @@ function renderMenu(){
 
 async function loadMenuForPlace(){
   try{
-    // getProducts filtre déjà stock>0 dans ton Apps Script
     const r = await apiJsonp("getProducts", {});
     if(!r || !r.ok) throw new Error(r?.error || "Erreur getProducts");
     menuProducts = Array.isArray(r.products) ? r.products : [];
