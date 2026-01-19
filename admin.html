@@ -712,7 +712,22 @@ window.readyTakeaway = async function(order){
     showErr(e.message || e);
   }
 };
+  
+window.readyDeliver = async function(order){
+  try{
+    const oid = String(order.OrderID||"").trim();
+    if(!oid) throw new Error("OrderID manquant");
+    await setStatus(oid, "Prêt à livrer");
+    openWhatsAppToClient(
+      order.Telephone,
+      "Votre commande est prête à livrer. Merci d'avoir choisi Bes Fast Food!"
+    );
+  }catch(e){
+    showErr(e.message || e);
+  }
+};
 
+  
 /***************
  * Print POS 80mm
  ***************/
