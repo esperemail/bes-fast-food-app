@@ -517,53 +517,73 @@
     if(isBusy) card.classList.add("dim");
     else card.classList.remove("dim");
   }
-function openQrModal(text){
-  const modal = document.getElementById("qrModal");
-  const img = document.getElementById("qrImg");
-  const ta = document.getElementById("qrText");
 
-  ta.value = text;
+  /*********************
+   * ✅ QR MODAL (FIX)
+   * - textarea: résumé complet
+   * - QR: version courte (évite URL trop longue)
+   * - service QR plus tolérant
+   *********************/
+  function openQrModal(summaryText, qrText){
+    const modal = document.getElementById("qrModal");
+    const img = document.getElementById("qrImg");
+    const ta = document.getElementById("qrText");
 
-  // QR via Google Chart (simple & fiable)
-  const url = "https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=" + encodeURIComponent(text);
-  img.src = url;
+    ta.value = String(summaryText || "");
 
-  modal.style.display = "block";
-}
+    // QR = texte court (max ~400 chars pour rester stable partout)
+    const qrPayload = String(qrText || summaryText || "").slice(0, 400);
 
-function closeQrModal(){
-  document.getElementById("qrModal").style.display = "none";
-}
+    // ✅ plus stable que chart.googleapis.com (et supporte mieux les URLs)
+    img.src =
+      "https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=" +
+      encodeURIComponent(qrPayload);
 
-async function copyQrText(){
-  try{
-    const t = document.getElementById("qrText").value;
-    await navigator.clipboard.writeText(t);
-    toast("Résumé copié ✅");
-    setTimeout(clearToast, 1200);
-  }catch(e){
-    toast("Impossible de copier (navigateur).");
-    setTimeout(clearToast, 1400);
+    modal.style.display = "block";
   }
-}
 
- function safeImgUrl(u){
-  const url = String(u||"").trim();
-  if(!url) return "";
-  if(/^https?:\/\//i.test(url)) return url;
+  function closeQrModal(){
+    document.getElementById("qrModal").style.display = "none";
+  }
 
-  // accepte ./fichier.png
-  if(url.startsWith("./")) return url;
+  async function copyQrText(){
+    try{
+      const t = document.getElementById("qrText").value;
+      await navigator.clipboard.writeText(t);
+      toast("Résumé copié ✅");
+      setTimeout(clearToast, 1200);
+    }catch(e){
+      // fallback (certains navigateurs bloquent clipboard sans HTTPS)
+      try{
+        const ta = document.getElementById("qrText");
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        toast("Résumé copié ✅");
+        setTimeout(clearToast, 1200);
+      }catch(_){
+        toast("Impossible de copier (navigateur).");
+        setTimeout(clearToast, 1400);
+      }
+    }
+  }
 
-  // accepte assets/...
-  if(url.startsWith("assets/")) return url;
+  function safeImgUrl(u){
+    const url = String(u||"").trim();
+    if(!url) return "";
+    if(/^https?:\/\//i.test(url)) return url;
 
-  // ✅ accepte aussi "Cornet.png" (racine)
-  if(!url.includes("/") && !url.includes("\\")) return "./" + url;
+    // accepte ./fichier.png
+    if(url.startsWith("./")) return url;
 
-  return "";
-}
+    // accepte assets/...
+    if(url.startsWith("assets/")) return url;
 
+    // ✅ accepte aussi "Cornet.png" (racine)
+    if(!url.includes("/") && !url.includes("\\")) return "./" + url;
+
+    return "";
+  }
 
   /*********************
    * JSONP (anti CORS)
@@ -718,47 +738,45 @@ async function copyQrText(){
     }
     updateFeeBox();
   }
-  
-/*********************
- * IMAGES (fallback local pour certains produits)
- * Si la colonne "Image" est vide dans Sheets, on utilise ces chemins.
- *********************/
-const PRODUCT_IMAGES_FALLBACK = {
-  "cornet-6-pieces": "./Cornet.png",
-  "gratine-wings": "./Gratiné & Wings.png",
-  "gratine-simple": "./Gratiné.png",
-  "wings-simple": "./Wings au BBQ.png",
-  "cupcake-6-pieces": "./Cucacke.png",
-  "lasagne-wings": "./lazagne & Wings.png",
-};
 
-function slugifyName(name){
-  return String(name||"")
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // enlève accents
-    .replace(/&/g, " ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+  /*********************
+   * IMAGES (fallback local)
+   *********************/
+  const PRODUCT_IMAGES_FALLBACK = {
+    "cornet-6-pieces": "./Cornet.png",
+    "gratine-wings": "./Gratiné & Wings.png",
+    "gratine-simple": "./Gratiné.png",
+    "wings-simple": "./Wings au BBQ.png",
+    "cupcake-6-pieces": "./Cucacke.png",
+    "lasagne-wings": "./lazagne & Wings.png",
+  };
+
+  function slugifyName(name){
+    return String(name||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // enlève accents
+      .replace(/&/g, " ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
 
   /*********************
    * MENU (depuis Apps Script)
    *********************/
   function normalizeProduct(p){
-    // tolérant aux noms de colonnes
     const ProductID = String(p.ProductID ?? p.id ?? p.Id ?? "").trim();
     const Nom = String(p.Nom ?? p.name ?? p.Name ?? "").trim();
     const Prix = Number(p.Prix ?? p.price ?? 0);
     const Description = String(p.Description ?? p.desc ?? "").trim();
     const Categorie = String(p.Categorie ?? p.category ?? "").trim();
+
     let Image = String(p.Image ?? p.image ?? "").trim();
     if(!Image){
-    const key = slugifyName(Nom);
-    Image = PRODUCT_IMAGES_FALLBACK[key] || "";
-}
+      const key = slugifyName(Nom);
+      Image = PRODUCT_IMAGES_FALLBACK[key] || "";
+    }
 
     const Stock = Number(p.Stock ?? p.stock ?? 0);
-
     return { ProductID, Nom, Prix, Description, Categorie, Image, Stock };
   }
 
@@ -770,12 +788,10 @@ function slugifyName(name){
         throw new Error("Réponse menu invalide");
       }
 
-      const products = r.products.map(normalizeProduct)
-        .filter(p => p.ProductID && p.Nom);
+      const products = r.products.map(normalizeProduct).filter(p => p.ProductID && p.Nom);
 
       // ✅ ne garder que stock > 0
       state.products = products.filter(p => Number(p.Stock||0) > 0);
-
       state.productsById = new Map(state.products.map(p => [String(p.ProductID), p]));
 
       $("menuStatus").textContent = `Menu chargé ✅ (${state.products.length} dispo)`;
@@ -802,7 +818,6 @@ function slugifyName(name){
         changed = true;
         continue;
       }
-      // option: limiter quantité au stock
       const qty = Math.max(1, Number(cart[pid]||1));
       const max = Math.max(1, Number(p.Stock||1));
       if(qty > max){
@@ -935,7 +950,6 @@ function slugifyName(name){
     const pid = String(productId);
     const next = (Number(cart[pid]||0) + 1);
 
-    // limiter au stock
     const max = Math.max(1, Number(p.Stock||1));
     cart[pid] = Math.min(next, max);
 
@@ -1035,14 +1049,14 @@ function slugifyName(name){
       msg += "🏠 Adresse : " + (payload.adresse || "-") + "\n";
     }
     if(payload.noteCommande){
-      msg += "\n📝 Note : " + payload.noteCommande + "\n";      
+      msg += "\n📝 Note : " + payload.noteCommande + "\n";
     }
     msg += "\n⚠️ Il faut envoyer par WhatsApp la preuve de paiement.\n";
     return msg;
   }
 
   /*********************
-   * CHECKOUT => WhatsApp + Sheets (sans image)
+   * CHECKOUT => WhatsApp + Sheets + QR
    *********************/
   async function checkout(){
     try{
@@ -1111,36 +1125,43 @@ function slugifyName(name){
       openWhatsApp(buildWhatsAppMessage(payload));
 
       // 2) Sheets
-    
       let savedOrderId = "";
-try{
-  const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
-  if(r && r.ok){
-    savedOrderId = String(r.orderId || "");
-    toast("✅ Commande enregistrée sur Google Sheets (ID: " + (savedOrderId || "OK") + ")");
-  }else{
-    toast("WhatsApp ouvert ✅ (Sheets: échec)");
-  }
-}catch(e){
-  toast("WhatsApp ouvert ✅ (Erreur Sheets)");
-}
-      
-// ✅ QR Code (même si Sheets échoue, on montre un résumé)
-const qrSummary =
-  "BES FAST FOOD | " +
-  "ID: " + (savedOrderId || ("LOCAL-" + Date.now())) + " | " +
-  "Nom: " + payload.clientNom + " | " +
-  "Tel: " + payload.telephone + " | " +
-  "Type: " + payload.typeCommande + " | " +
-  (norm(payload.typeCommande)==="livraison" ? ("Adr: " + (payload.adresse||"-") + " | ") : "") +
-  "Paiement: " + payload.paymentMethod + " | " +
-  "Total: " + fmtHTG(payload.total) + " | " +
-  "Items: " + payload.items.map(it => `${it.Nom}x${it.Quantite}`).join(", ");
+      try{
+        const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
+        if(r && r.ok){
+          savedOrderId = String(r.orderId || "");
+          toast("✅ Commande enregistrée sur Google Sheets (ID: " + (savedOrderId || "OK") + ")");
+        }else{
+          toast("WhatsApp ouvert ✅ (Sheets: échec)");
+        }
+      }catch(e){
+        toast("WhatsApp ouvert ✅ (Erreur Sheets)");
+      }
 
-openQrModal(qrSummary);
+      // ✅ Résumé long (textarea)
+      const summaryLong =
+        "BES FAST FOOD | " +
+        "ID: " + (savedOrderId || ("LOCAL-" + Date.now())) + " | " +
+        "Nom: " + payload.clientNom + " | " +
+        "Tel: " + payload.telephone + " | " +
+        "Type: " + payload.typeCommande + " | " +
+        (norm(payload.typeCommande)==="livraison" ? ("Adr: " + (payload.adresse||"-") + " | ") : "") +
+        "Paiement: " + payload.paymentMethod + " | " +
+        "Total: " + fmtHTG(payload.total) + " | " +
+        "Items: " + payload.items.map(it => `${it.Nom}x${it.Quantite}`).join(", ");
 
-        
-      // ✅ Reset TOUJOURS (évite bouton “pressé” + double commande)
+      // ✅ QR court (évite image cassée)
+      const qrShort =
+        "BES|" +
+        "ID:" + (savedOrderId || ("LOCAL-" + Date.now())) + "|" +
+        "Tel:" + payload.telephone + "|" +
+        "Type:" + payload.typeCommande + "|" +
+        "Pay:" + payload.paymentMethod + "|" +
+        "Total:" + payload.total;
+
+      openQrModal(summaryLong, qrShort);
+
+      // ✅ Reset TOUJOURS
       clearCart();
       renderCart();
 
@@ -1211,6 +1232,8 @@ openQrModal(qrSummary);
     loadMenuFromServer();
   })();
 </script>
+
+<!-- ✅ Modal QR (juste avant </body>) -->
 <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; padding:18px;">
   <div style="max-width:420px; margin:60px auto; background:#fff; border-radius:18px; padding:16px; border:1px solid rgba(0,0,0,.15);">
     <div style="font-weight:1000; font-size:18px; margin-bottom:6px;">✅ Commande envoyée</div>
@@ -1231,11 +1254,3 @@ openQrModal(qrSummary);
 
 </body>
 </html>
-
-
-
-
-
-
-
-
