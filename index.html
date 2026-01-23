@@ -1,14 +1,381 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BES Fast Food - Commande</title>
+  <style>
+    :root{
+      --y:#FFC107; --o:#FF9800; --r:#D32F2F; --g:#2E7D32; --b:#5D4037;
+      --bg:#fff7e6; --card:#ffffff; --muted:#6b7280;
+      --shadow: 0 12px 30px rgba(93,64,55,.14);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:#1f2937;
+      background:
+        radial-gradient(900px 420px at 10% 0%, rgba(255,193,7,.50), transparent 60%),
+        radial-gradient(900px 420px at 90% 10%, rgba(255,152,0,.38), transparent 60%),
+        var(--bg);
+    }
+    header{
+      position:sticky; top:0; z-index:50;
+      background: linear-gradient(90deg, var(--y), var(--o));
+      border-bottom:1px solid rgba(93,64,55,.18);
+      padding: 10px 14px;
+    }
+    .topbar{ max-width:1100px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand{ display:flex; align-items:center; gap:12px; min-width:0; }
+    .logoWrap{
+      width:56px; height:56px; border-radius:16px;
+      background: rgba(255,255,255,.80);
+      border:2px solid rgba(93,64,55,.28);
+      box-shadow: 0 10px 22px rgba(93,64,55,.18);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden; flex:0 0 auto;
+    }
+    .logoWrap img{width:100%; height:100%; object-fit:contain; display:block;}
+    .brandText{ display:flex; flex-direction:column; line-height:1.05; width: 120px; min-width:120px; }
+    .brandName{ font-size:22px; font-weight:1000; letter-spacing: 8px; color:#2b1b16; white-space:nowrap; }
+    .brandTag{ margin-top:4px; font-size:13px; font-weight:1000; color: rgba(46,125,50,.95); white-space:nowrap; }
+    .pill{
+      font-size:12px; font-weight:1000;
+      padding:10px 14px; border-radius:999px;
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(93,64,55,.22);
+      color:#2b1b16; white-space:nowrap;
+      box-shadow: 0 10px 20px rgba(93,64,55,.12);
+    }
+    @media (max-width:520px){
+      .brandText{width:108px;min-width:108px}
+      .brandName{font-size:18px; letter-spacing:6px}
+      .brandTag{font-size:12px}
+      .pill{padding:9px 12px}
+      .logoWrap{width:50px;height:50px}
+    }
+
+    .wrap{max-width:1100px; margin:auto; padding:16px}
+    .grid{display:grid; grid-template-columns: 2fr 1fr; gap:14px}
+    @media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      border:1px solid rgba(93,64,55,.16);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:14px 14px 10px 14px;
+      background: linear-gradient(180deg, rgba(255,193,7,.28), rgba(255,152,0,.10));
+      border-bottom:1px solid rgba(93,64,55,.12);
+    }
+    .row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .muted{color:var(--muted); font-size:13px}
+    .controls{
+      padding:12px 14px; display:flex; gap:10px; align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(93,64,55,.10);
+      background: rgba(255,255,255,.62);
+    }
+    input,select,textarea{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(93,64,55,.22);
+      outline:none;
+      background:#fff;
+      font-size:14px;
+    }
+    textarea{min-height:80px; resize:vertical}
+    .products{ padding:14px; display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; }
+    @media(max-width:560px){ .products{grid-template-columns:1fr} }
+
+    .prod{
+      border-radius: 18px;
+      border:1px solid rgba(93,64,55,.18);
+      background: radial-gradient(520px 160px at 0% 0%, rgba(255,193,7,.30), transparent 60%), #fff;
+      padding:12px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .prod:hover{ transform: translateY(-2px); box-shadow: 0 18px 34px rgba(93,64,55,.16); }
+    .prodTop{display:flex; gap:10px}
+    .thumb{
+      width:72px; height:72px; border-radius:16px;
+      background: rgba(255,152,0,.16);
+      border:1px solid rgba(93,64,55,.14);
+      overflow:hidden; flex:0 0 auto;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:1000; color:#2b1b16;
+    }
+    .thumb img{width:100%; height:100%; object-fit:cover; display:block}
+    .title{font-weight:1000; letter-spacing:.2px; margin:0}
+    .desc{margin-top:6px; font-size:13px; color:var(--muted)}
+    .price{
+      font-weight:1000;
+      color: var(--b);
+      background: rgba(255,152,0,.16);
+      border:1px solid rgba(93,64,55,.12);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      display:inline-block;
+    }
+    .badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(93,64,55,.14);
+      background: rgba(255,255,255,.75);
+      font-weight:1000;
+      color:#2b1b16;
+    }
+    .badge.green{border-color:rgba(46,125,50,.25); color:rgba(46,125,50,.95)}
+    .badge.pink{border-color:rgba(211,47,47,.20); color:rgba(211,47,47,.90)}
+
+    .btn{
+      width:100%;
+      padding:11px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(93,64,55,.18);
+      background: rgba(255,255,255,.74);
+      font-weight:1000;
+      cursor:pointer;
+      transition: transform .14s ease, filter .14s ease;
+    }
+    .btn:active{ transform: scale(.99) }
+    .btnPrimary{
+      background: linear-gradient(90deg, var(--r), #ff3b30);
+      color:#fff; border:none;
+      box-shadow: 0 16px 26px rgba(211,47,47,.22);
+    }
+    .btnAdd{ background: linear-gradient(90deg, #111, #2b1b16); color:#fff; border:none; }
+    button:disabled{ opacity:.45; cursor:not-allowed; filter: grayscale(.25); }
+    .btnPrimary:disabled{ box-shadow:none !important; }
+
+    .cartBody{padding:14px}
+    .hr{height:1px; background: rgba(93,64,55,.10); margin:12px 0}
+    .cartItem{ padding:10px 0; display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+    .cartItem .name{font-weight:1000}
+    .cartItem .sub{font-size:13px; color:var(--muted)}
+    .miniBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .mini{
+      padding:8px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(93,64,55,.20);
+      background:#fff;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .mini.danger{border-color:rgba(211,47,47,.35); color:var(--r)}
+
+    .field{margin-top:10px}
+    .label{
+      font-size:12px; font-weight:1000; color:#2b1b16;
+      margin:0 0 6px 4px; display:flex; gap:8px; align-items:center;
+    }
+    .req{
+      font-size:11px; font-weight:1000;
+      color: var(--r);
+      background: rgba(211,47,47,.10);
+      border:1px solid rgba(211,47,47,.18);
+      padding:2px 8px; border-radius:999px;
+    }
+
+    .toast{
+      display:none; margin-top:10px;
+      padding:10px 12px; border-radius:14px;
+      border:1px solid rgba(46,125,50,.22);
+      background: rgba(46,125,50,.08);
+      color: rgba(46,125,50,.95);
+      font-weight:1000;
+    }
+    .err{
+      display:none; margin: 14px 0 0 0;
+      padding:12px 14px; border-radius: 16px;
+      border:1px solid rgba(211,47,47,.25);
+      background: rgba(211,47,47,.08);
+      color: rgba(211,47,47,.95);
+      font-weight:1000;
+    }
+    .dim{ opacity:.65; pointer-events:none; filter:saturate(.9); }
+
+    .payBox{ border:1px solid rgba(93,64,55,.16); border-radius:16px; padding:10px 12px; background: rgba(255,255,255,.65); }
+    .payRow{ display:flex; gap:12px; align-items:center; padding:10px 0; border-top:1px dashed rgba(93,64,55,.16); }
+    .payRow:first-child{ border-top:none; }
+    .payRadio{ width:18px; height:18px; accent-color:#111; flex:0 0 auto; }
+    .payText{flex:1; min-width:0}
+    .payTitle{ font-weight:1000; line-height:1.2; word-break: break-word; }
+    .paySub{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+    .feeBox{
+      margin-top:10px; padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(93,64,55,.14);
+      background: rgba(255,193,7,.10);
+      font-size:13px;
+      font-weight:900;
+      color:#2b1b16;
+      display:none;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logoWrap">
+        <img src="logo.jpg" alt="BES Fast Food" onerror="this.remove()">
+      </div>
+      <div class="brandText">
+        <div class="brandName">BES</div>
+        <div class="brandTag">Fast Food</div>
+      </div>
+    </div>
+    <div class="pill">Commande en ligne rapide et Pro</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="err" class="err"></div>
+
+  <div class="grid">
+    <!-- MENU -->
+    <div class="card">
+      <div class="cardHead">
+        <div class="row">
+          <div>
+            <div style="font-weight:1000;font-size:18px">Menu</div>
+            <div class="muted" id="menuStatus">Chargement depuis Apps Script...</div>
+          </div>
+          <div style="max-width:260px; width:100%">
+            <select id="catFilter"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div style="flex:1">
+          <input id="search" placeholder="Recherche (ex: wings, gratiné...)">
+        </div>
+        <button class="btn" id="resetCartBtn" type="button" style="max-width:180px">Vider panier</button>
+      </div>
+
+      <div id="products" class="products">
+        <div class="muted" style="padding:14px">Chargement du menu...</div>
+      </div>
+    </div>
+
+    <!-- PANIER -->
+    <div class="card" id="cartCard">
+      <div class="cardHead">
+        <div class="row">
+          <div>
+            <div style="font-weight:1000;font-size:18px">Panier</div>
+            <div class="muted"></div>
+          </div>
+          <button class="btn" id="refreshBtn" type="button" style="max-width:170px">Actualiser</button>
+        </div>
+      </div>
+
+      <div class="cartBody">
+        <div id="cartItems" class="muted">Panier vide</div>
+        <div class="hr"></div>
+
+        <div class="row">
+          <b>Total</b>
+          <b id="total">0.00 HTG</b>
+        </div>
+
+        <div id="feeBox" class="feeBox"></div>
+
+        <div class="hr"></div>
+
+        <div style="font-weight:1000;margin-bottom:8px">Finaliser</div>
+
+        <div class="field">
+          <div class="label">Nom <span class="req">Obligatoire</span></div>
+          <input id="clientNom" placeholder="Ex: Jean Paul">
+        </div>
+
+        <div class="field">
+          <div class="label">Téléphone <span class="req">Obligatoire</span></div>
+          <input id="telephone" placeholder="Ex: +509...">
+        </div>
+
+        <div class="field">
+          <div class="label">Type de commande</div>
+          <select id="typeCommande">
+            <option>Sur place</option>
+            <option>À emporter</option>
+            <option>Livraison</option>
+          </select>
+        </div>
+
+        <div class="field" id="addrWrap" style="display:none">
+          <div class="label">Adresse de livraison <span class="req">Obligatoire</span></div>
+          <textarea id="adresse" placeholder="Ex: Rue..., maison..., repère..."></textarea>
+
+          <div class="field" style="margin-top:10px">
+            <div class="label">Zone de livraison <span class="req">Obligatoire</span></div>
+            <select id="zoneLivraison">
+              <option value="">Choisir une zone...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Note (optionnel)</div>
+          <textarea id="noteCommande" placeholder="Ex: sans piment..."></textarea>
+        </div>
+
+        <!-- Paiement obligatoire -->
+        <div class="field">
+          <div class="label">Paiement <span class="req">Obligatoire</span></div>
+          <div class="payBox">
+            <label class="payRow">
+              <input class="payRadio" type="radio" name="pay" value="MonCash">
+              <div class="payText">
+                <div class="payTitle">MonCash — 48094439 — RAL-Jn-PIE</div>
+                <div class="paySub">Choisis MonCash si tu as payé sur ce numéro.</div>
+              </div>
+            </label>
+
+            <label class="payRow">
+              <input class="payRadio" type="radio" name="pay" value="NatCash">
+              <div class="payText">
+                <div class="payTitle">NatCash — 40430164 — RAL-Jn-PIE</div>
+                <div class="paySub">Choisis NatCash si tu as payé sur ce numéro.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <button class="btn btnPrimary" id="checkoutBtn" type="button" disabled>Envoyer la commande ✅</button>
+          <div id="toast" class="toast"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-/* =========================
-   CONFIG
-========================= */
+/*********************
+ * CONFIG
+ *********************/
 const WHATSAPP_NUMBER = "50940430164"; // chiffres seulement
 const API_URL = "https://script.google.com/macros/s/AKfycbzQshvQz_slq9esRqHODdW0bWSPz-_a7RqsSGtOuKCK9Wru3_Dj6pRGZCE2NqMFhe8_/exec";
-const CART_KEY = "bes_cart_v2";
+const CART_KEY = "bes_cart_v1";
 
-/* =========================
-   LIVRAISON: zones + frais
-========================= */
+/*********************
+ * LIVRAISON: ZONES + FRAIS
+ *********************/
 const DELIVERY_ZONES = [
   { key:"Madeline", label:"Centre ville - Madeline", fee:250 },
   { key:"BarriereBouteille", label:"Centre ville - Barrière Bouteille", fee:250 },
@@ -18,259 +385,97 @@ const DELIVERY_ZONES = [
   { key:"Limonade", label:"Centre ville - Limonade", fee:500 }
 ];
 
-/* =========================
-   STATE
-========================= */
+/*********************
+ * STATE
+ *********************/
 const state = {
+  guestId: null,
   products: [],
-  productsById: new Map(),
-  lastOrderPayload: null,
-  lastOrderId: ""
+  productsById: new Map()
 };
 
-/* =========================
-   HELPERS
-========================= */
+/*********************
+ * HELPERS
+ *********************/
 const $ = (id)=>document.getElementById(id);
-const norm = (s)=>String(s||"").toLowerCase().trim();
 
+function norm(s){ return String(s||"").toLowerCase().trim(); }
 function fmtHTG(n){
   const x = Number(n||0);
-  return x.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}) + " HTG";
+  return x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " HTG";
 }
 
 function toast(msg){
-  const t = $("toast");
-  if(!t) return;
-  t.textContent = String(msg||"");
-  // si ton CSS mettait display:none, on l'affiche
-  t.style.display = (msg ? "block" : "none");
+  const t=$("toast");
+  t.style.display="block";
+  t.textContent=String(msg||"");
 }
-</script>
-<script>
-/* =========================
-   LIVRAISON helpers
-========================= */
-function isLivraison(){
-  const tc = $("typeCommande");
-  return tc ? (norm(tc.value) === "livraison") : false;
+function clearToast(){
+  const t=$("toast");
+  t.style.display="none";
+  t.textContent="";
 }
-
-function getZoneSelect(){
-  return $("zoneLivraison"); // existe dans ton HTML (ou injecté plus bas)
+function showErr(t){
+  const e=$("err");
+  e.style.display="block";
+  e.textContent = String(t || "Erreur");
+  window.scrollTo({top:0, behavior:"smooth"});
 }
-
-function getSelectedZone(){
-  const z = getZoneSelect();
-  if(!z) return null;
-  const key = String(z.value||"").trim();
-  return DELIVERY_ZONES.find(x => x.key === key) || null;
+function hideErr(){
+  const e=$("err");
+  e.style.display="none";
+  e.textContent="";
 }
-
-function getDeliveryFee(){
-  if(!isLivraison()) return 0;
-  const z = getSelectedZone();
-  return z ? Number(z.fee||0) : 0;
+function setBusy(isBusy){
+  const card = $("cartCard");
+  if(isBusy) card.classList.add("dim");
+  else card.classList.remove("dim");
 }
 
-function ensureFeeBox(){
-  let fb = $("feeBox");
-  if(fb) return fb;
+function openQrModal(text){
+  const modal = document.getElementById("qrModal");
+  const img = document.getElementById("qrImg");
+  const ta = document.getElementById("qrText");
+  ta.value = text;
 
-  // si pas dans HTML, on le crée proche du total si possible
-  fb = document.createElement("div");
-  fb.id = "feeBox";
+  // QR via Google Chart
+  const url = "https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=" + encodeURIComponent(text);
+  img.src = url;
+  modal.style.display = "block";
+}
+function closeQrModal(){ document.getElementById("qrModal").style.display = "none"; }
 
-  // essaye de le placer avant le bouton checkout, sinon à la fin du cart
-  const checkoutBtn = $("checkoutBtn");
-  if(checkoutBtn && checkoutBtn.parentElement){
-    checkoutBtn.parentElement.insertBefore(fb, checkoutBtn);
-  }else{
-    const cart = $("cartCard") || document.body;
-    cart.appendChild(fb);
+async function copyQrText(){
+  try{
+    const t = document.getElementById("qrText").value;
+    await navigator.clipboard.writeText(t);
+    toast("Résumé copié ✅");
+    setTimeout(clearToast, 1200);
+  }catch(e){
+    toast("Impossible de copier (navigateur).");
+    setTimeout(clearToast, 1400);
   }
-  return fb;
 }
 
-function syncLivraisonUI(){
-  const liv = isLivraison();
-
-  // meilleur: si tu as un wrapper addrWrap, on l'utilise
-  const wrap = $("addrWrap");
-  const adresse = $("adresse");
-  const zoneSel = getZoneSelect();
-
-  if(wrap){
-    wrap.style.display = liv ? "block" : "none";
-  }else{
-    // fallback: on cache/affiche les champs individuellement
-    if(adresse) adresse.style.display = liv ? "block" : "none";
-    if(zoneSel) zoneSel.style.display = liv ? "block" : "none";
-  }
-
-  if(adresse) adresse.disabled = !liv;
-  if(zoneSel) zoneSel.disabled = !liv;
-
-  if(!liv){
-    if(adresse) adresse.value = "";
-    if(zoneSel) zoneSel.value = "";
-  }
-
-  // feeBox UI
-  const fb = ensureFeeBox();
-  if(!liv){
-    fb.style.display = "none";
-    fb.innerHTML = "";
-  }else{
-    fb.style.display = "block";
-  }
-
-  renderCart();
-}
-</script>
-<script>
-/* =========================
-   LIVRAISON helpers
-========================= */
-function isLivraison(){
-  const tc = $("typeCommande");
-  return tc ? (norm(tc.value) === "livraison") : false;
+function safeImgUrl(u){
+  const url = String(u||"").trim();
+  if(!url) return "";
+  if(/^https?:\/\//i.test(url)) return url;
+  if(url.startsWith("./")) return url;
+  if(url.startsWith("assets/")) return url;
+  if(!url.includes("/") && !url.includes("\\")) return "./" + url;
+  return "";
 }
 
-function getZoneSelect(){
-  return $("zoneLivraison"); // existe dans ton HTML (ou injecté plus bas)
-}
-
-function getSelectedZone(){
-  const z = getZoneSelect();
-  if(!z) return null;
-  const key = String(z.value||"").trim();
-  return DELIVERY_ZONES.find(x => x.key === key) || null;
-}
-
-function getDeliveryFee(){
-  if(!isLivraison()) return 0;
-  const z = getSelectedZone();
-  return z ? Number(z.fee||0) : 0;
-}
-
-function ensureFeeBox(){
-  let fb = $("feeBox");
-  if(fb) return fb;
-
-  // si pas dans HTML, on le crée proche du total si possible
-  fb = document.createElement("div");
-  fb.id = "feeBox";
-
-  // essaye de le placer avant le bouton checkout, sinon à la fin du cart
-  const checkoutBtn = $("checkoutBtn");
-  if(checkoutBtn && checkoutBtn.parentElement){
-    checkoutBtn.parentElement.insertBefore(fb, checkoutBtn);
-  }else{
-    const cart = $("cartCard") || document.body;
-    cart.appendChild(fb);
-  }
-  return fb;
-}
-
-function syncLivraisonUI(){
-  const liv = isLivraison();
-
-  // meilleur: si tu as un wrapper addrWrap, on l'utilise
-  const wrap = $("addrWrap");
-  const adresse = $("adresse");
-  const zoneSel = getZoneSelect();
-
-  if(wrap){
-    wrap.style.display = liv ? "block" : "none";
-  }else{
-    // fallback: on cache/affiche les champs individuellement
-    if(adresse) adresse.style.display = liv ? "block" : "none";
-    if(zoneSel) zoneSel.style.display = liv ? "block" : "none";
-  }
-
-  if(adresse) adresse.disabled = !liv;
-  if(zoneSel) zoneSel.disabled = !liv;
-
-  if(!liv){
-    if(adresse) adresse.value = "";
-    if(zoneSel) zoneSel.value = "";
-  }
-
-  // feeBox UI
-  const fb = ensureFeeBox();
-  if(!liv){
-    fb.style.display = "none";
-    fb.innerHTML = "";
-  }else{
-    fb.style.display = "block";
-  }
-
-  renderCart();
-}
-</script>
-<script>
-/* =========================
-   CART UI + frais livraison
-========================= */
-function renderCart(){
-  const totalEl = $("total");
-  const cartItemsEl = $("cartItems");
-  if(!totalEl || !cartItemsEl) return;
-
-  const cart = loadCart();
-  const items = cartToItems(cart);
-  const sub = cartSubtotal(cart);
-  const fee = getDeliveryFee();
-  const total = sub + fee;
-
-  totalEl.textContent = fmtHTG(total);
-
-  // frais livraison (SEULEMENT si livraison)
-  const fb = ensureFeeBox();
-  if(isLivraison()){
-    const z = getSelectedZone();
-    fb.style.display = "block";
-    fb.innerHTML = `
-      <div style="padding:10px;border-radius:12px;background:#fff6d7;border:1px solid #f2e2a8;margin-top:10px">
-        🚚 Frais livraison : <b>${fmtHTG(fee)}</b><br>
-        📌 Zone : <b>${z ? z.label : "Choisir une zone"}</b>
-      </div>
-    `;
-  }else{
-    fb.style.display = "none";
-    fb.innerHTML = "";
-  }
-
-  if(!items.length){
-    cartItemsEl.innerHTML = `<div class="muted">Panier vide</div>`;
-    return;
-  }
-
-  cartItemsEl.innerHTML = items.map(it=>{
-    const line = Number(it.Prix)*Number(it.Quantite);
-    return `
-      <div style="display:flex;justify-content:space-between;gap:10px;margin:10px 0">
-        <div style="min-width:0">
-          <div style="font-weight:900">${it.Nom}</div>
-          <div class="muted">${fmtHTG(it.Prix)} × ${it.Quantite} = <b>${fmtHTG(line)}</b></div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button type="button" class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite-1})">−</button>
-          <button type="button" class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite+1})">+</button>
-        </div>
-      </div>
-      <div class="hr"></div>
-    `;
-  }).join("");
-}
-</script>
-<script>
-/* =========================
-   API JSONP (Apps Script)
-========================= */
+/*********************
+ * JSONP (anti CORS)
+ *********************/
 function apiJsonp(action, params = {}) {
   return new Promise((resolve, reject) => {
+    if(!API_URL || API_URL.includes("XXXXX")){
+      reject(new Error("API_URL manquant. Mets ton lien Apps Script dans API_URL."));
+      return;
+    }
     const cb = "cb_" + Math.random().toString(16).slice(2);
     const q = new URLSearchParams({ action, callback: cb, ...params }).toString();
     const url = API_URL + "?" + q;
@@ -283,27 +488,26 @@ function apiJsonp(action, params = {}) {
     const timer = setTimeout(()=>{
       if(done) return;
       done = true;
-      cleanup();
+      try { delete window[cb]; } catch(e){}
+      try { s.remove(); } catch(e){}
       reject(new Error("Timeout API"));
     }, 15000);
-
-    function cleanup(){
-      clearTimeout(timer);
-      try{ delete window[cb]; }catch(e){}
-      try{ s.remove(); }catch(e){}
-    }
 
     window[cb] = (data) => {
       if(done) return;
       done = true;
-      cleanup();
+      clearTimeout(timer);
+      try { delete window[cb]; } catch(e){}
+      try { s.remove(); } catch(e){}
       resolve(data);
     };
 
     s.onerror = () => {
       if(done) return;
       done = true;
-      cleanup();
+      clearTimeout(timer);
+      try { delete window[cb]; } catch(e){}
+      try { s.remove(); } catch(e){}
       reject(new Error("API error / network"));
     };
 
@@ -311,285 +515,437 @@ function apiJsonp(action, params = {}) {
   });
 }
 
-async function loadMenu(){
+/*********************
+ * GUEST ID
+ *********************/
+function getGuestId(){
+  let id = localStorage.getItem("guestId");
+  if(!id){
+    id = "guest-" + (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+"-"+Math.random().toString(16).slice(2)));
+    localStorage.setItem("guestId", id);
+  }
+  return id;
+}
+
+/*********************
+ * CART (local)
+ *********************/
+function loadCart(){
+  try{
+    const raw = localStorage.getItem(CART_KEY);
+    if(!raw) return {};
+    const obj = JSON.parse(raw);
+    return (obj && typeof obj === "object") ? obj : {};
+  }catch(_){
+    return {};
+  }
+}
+function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart || {})); }
+function clearCart(){ localStorage.removeItem(CART_KEY); }
+
+function productById(pid){ return state.productsById.get(String(pid)) || null; }
+
+function cartToItems(cartObj){
+  const items = [];
+  for(const [pid, qty] of Object.entries(cartObj || {})){
+    const p = productById(pid);
+    if(!p) continue;
+    if(Number(p.Stock||0) <= 0) continue;
+    items.push({
+      ProductID: String(p.ProductID),
+      Nom: p.Nom,
+      Prix: Number(p.Prix||0),
+      Quantite: Math.max(1, Number(qty||1))
+    });
+  }
+  return items;
+}
+function cartSubtotal(cartObj){
+  let total = 0;
+  for(const [pid, qty] of Object.entries(cartObj || {})){
+    const p = productById(pid);
+    if(!p) continue;
+    if(Number(p.Stock||0) <= 0) continue;
+    total += Number(p.Prix||0) * Math.max(1, Number(qty||1));
+  }
+  return total;
+}
+
+/*********************
+ * LIVRAISON helpers
+ *********************/
+function isLivraison(){ return norm($("typeCommande").value) === "livraison"; }
+
+function loadZonesUI(){
+  $("zoneLivraison").innerHTML =
+    `<option value="">Choisir une zone...</option>` +
+    DELIVERY_ZONES.map(z => `<option value="${z.key}">${z.label} — ${fmtHTG(z.fee)}</option>`).join("");
+}
+
+function getSelectedZone(){
+  const key = String($("zoneLivraison").value || "").trim();
+  return DELIVERY_ZONES.find(z => z.key === key) || null;
+}
+function getDeliveryFee(){
+  if(!isLivraison()) return 0;
+  const z = getSelectedZone();
+  return z ? Number(z.fee||0) : 0;
+}
+function updateFeeBox(){
+  const box = $("feeBox");
+  if(!isLivraison()){
+    box.style.display = "none";
+    box.textContent = "";
+    return;
+  }
+  const z = getSelectedZone();
+  box.style.display = "block";
+  if(!z){
+    box.textContent = "🚚 Frais de livraison : choisissez une zone.";
+    return;
+  }
+  box.textContent = `🚚 Frais de livraison (${z.label}) : ${fmtHTG(z.fee)}`;
+}
+function syncAddressVisibility(){
+  $("addrWrap").style.display = isLivraison() ? "block" : "none";
+  if(!isLivraison()){
+    $("adresse").value = "";
+    $("zoneLivraison").value = "";
+  }
+  updateFeeBox();
+}
+
+/*********************
+ * IMAGES fallback
+ *********************/
+const PRODUCT_IMAGES_FALLBACK = {
+  "cornet-6-pieces": "./Cornet.png",
+  "gratine-wings": "./Gratiné & Wings.png",
+  "gratine-simple": "./Gratiné.png",
+  "wings-simple": "./Wings au BBQ.png",
+  "cupcake-6-pieces": "./Cucacke.png",
+  "lasagne-wings": "./lazagne & Wings.png",
+};
+
+function slugifyName(name){
+  return String(name||"")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/*********************
+ * MENU (Apps Script)
+ *********************/
+function normalizeProduct(p){
+  const ProductID = String(p.ProductID ?? p.id ?? p.Id ?? "").trim();
+  const Nom = String(p.Nom ?? p.name ?? p.Name ?? "").trim();
+  const Prix = Number(p.Prix ?? p.price ?? 0);
+  const Description = String(p.Description ?? p.desc ?? "").trim();
+  const Categorie = String(p.Categorie ?? p.category ?? "").trim();
+  let Image = String(p.Image ?? p.image ?? "").trim();
+  if(!Image){
+    const key = slugifyName(Nom);
+    Image = PRODUCT_IMAGES_FALLBACK[key] || "";
+  }
+  const Stock = Number(p.Stock ?? p.stock ?? 0);
+  return { ProductID, Nom, Prix, Description, Categorie, Image, Stock };
+}
+
+async function loadMenuFromServer(){
+  $("menuStatus").textContent = "Chargement depuis Apps Script...";
   try{
     const r = await apiJsonp("getMenu", {});
-    if(r && r.ok && Array.isArray(r.products)){
-      state.products = r.products.map(p => ({
-        ProductID: String(p.ProductID ?? p.id ?? "").trim(),
-        Nom: String(p.Nom ?? p.name ?? "").trim(),
-        Prix: Number(p.Prix ?? p.price ?? 0),
-        Description: String(p.Description ?? p.desc ?? "").trim()
-      })).filter(p => p.ProductID && p.Nom);
-
-      state.productsById = new Map(state.products.map(p=>[String(p.ProductID), p]));
-      renderProducts();
-      return;
+    if(!r || !r.ok || !Array.isArray(r.products)){
+      throw new Error("Réponse menu invalide");
     }
-  }catch(e){
-    // fallback
-  }
 
-  // fallback local
-  state.products = [
-    {ProductID:"1", Nom:"Wings Simple", Prix:750, Description:"Wings BBQ"},
-    {ProductID:"2", Nom:"Gratiné", Prix:900, Description:"Gratiné maison"}
-  ];
-  state.productsById = new Map(state.products.map(p=>[String(p.ProductID), p]));
+    const products = r.products
+      .map(normalizeProduct)
+      .filter(p => p.ProductID && p.Nom);
+
+    state.products = products.filter(p => Number(p.Stock||0) > 0);
+    state.productsById = new Map(state.products.map(p => [String(p.ProductID), p]));
+
+    $("menuStatus").textContent = `Menu chargé ✅ (${state.products.length} dispo)`;
+    loadProductsUI();
+    sanitizeCartAgainstStock();
+    renderCart();
+    validateCheckoutButton();
+  }catch(e){
+    $("menuStatus").textContent = "Impossible de charger le menu (serveur).";
+    $("products").innerHTML = `
+      <div class="muted" style="padding:14px">
+        ❌ Menu indisponible. Vérifie Apps Script (action=getMenu).
+      </div>`;
+  }
+}
+
+function sanitizeCartAgainstStock(){
+  const cart = loadCart();
+  let changed = false;
+
+  for(const pid of Object.keys(cart)){
+    const p = productById(pid);
+    if(!p || Number(p.Stock||0) <= 0){
+      delete cart[pid];
+      changed = true;
+      continue;
+    }
+    const qty = Math.max(1, Number(cart[pid]||1));
+    const max = Math.max(1, Number(p.Stock||1));
+    if(qty > max){
+      cart[pid] = max;
+      changed = true;
+    }
+  }
+  if(changed) saveCart(cart);
+}
+
+function loadProductsUI(){
+  const cats = Array.from(new Set(state.products.map(p=>p.Categorie).filter(Boolean)));
+  $("catFilter").innerHTML =
+    `<option value="">Toutes catégories</option>` +
+    cats.map(c => `<option>${c}</option>`).join("");
+
+  $("catFilter").onchange = renderProducts;
+  $("search").oninput = renderProducts;
   renderProducts();
 }
 
-/* =========================
-   Paiement (corrigé)
-   - supporte radios name="pay"
-   - supporte aussi select id="paiement" si tu l'as
-========================= */
-function getPaymentMethod(){
-  // 1) radio
-  const r = document.querySelector("input[name='pay']:checked");
-  if(r) return String(r.value||"").trim();
+function renderProducts(){
+  const cat = $("catFilter").value;
+  const q = norm($("search").value);
 
-  // 2) select
-  const s = $("paiement");
-  if(s) return String(s.value||"").trim();
-
-  return "";
-}
-
-function getNoteCommande(){
-  const n = $("noteCommande");
-  return n ? String(n.value||"").trim() : "";
-}
-</script>
-<script>
-/* =========================
-   WhatsApp + QR + Reçu
-========================= */
-function buildWhatsAppMessage(payload){
-  let msg = "🍔 BES FAST FOOD – NOUVELLE COMMANDE\n\n";
-  msg += "👤 Nom : " + payload.clientNom + "\n";
-  msg += "📞 Téléphone : " + payload.telephone + "\n";
-  msg += "📍 Type : " + payload.typeCommande + "\n";
-
-  if(norm(payload.typeCommande)==="livraison"){
-    msg += "🏠 Adresse : " + (payload.adresse || "-") + "\n";
-    msg += "🗺️ Zone : " + (payload.deliveryZoneLabel || "-") + "\n";
-  }
-
-  msg += "\n🛍️ Produits:\n";
-  payload.items.forEach(it=>{
-    const line = Number(it.Prix)*Number(it.Quantite);
-    msg += "- " + it.Nom + " x" + it.Quantite + " = " + fmtHTG(line) + "\n";
+  const list = state.products.filter(p => {
+    const okCat = (!cat || String(p.Categorie) === String(cat));
+    const hay = norm(p.Nom) + " " + norm(p.Description) + " " + norm(p.Categorie);
+    const okQ = (!q || hay.includes(q));
+    return okCat && okQ;
   });
 
-  msg += "\n🧾 Sous-total : " + fmtHTG(payload.subTotal) + "\n";
-  if(payload.deliveryFee > 0) msg += "🚚 Livraison : " + fmtHTG(payload.deliveryFee) + "\n";
-  msg += "💰 Total : " + fmtHTG(payload.total) + "\n";
-  msg += "💳 Paiement : " + payload.paymentMethod + "\n";
+  const box = $("products");
+  if(list.length===0){
+    box.innerHTML = `<div class="muted" style="padding:14px">Aucun produit disponible.</div>`;
+    return;
+  }
 
-  if(payload.noteCommande) msg += "\n📝 Note : " + payload.noteCommande + "\n";
-  msg += "\n⚠️ Envoyer la preuve de paiement sur WhatsApp.\n";
-  return msg;
+  box.innerHTML = list.map(p=>{
+    const img = safeImgUrl(p.Image);
+    const safeAlt = (p.Nom||"").replace(/"/g,"&quot;");
+    const thumb = img
+      ? `<img src="${img}" alt="${safeAlt}" onerror="this.onerror=null; this.remove(); this.parentElement.textContent='BES';">`
+      : `BES`;
+
+    const badgeClass = (p.Categorie === "Dessert") ? "badge pink" : "badge green";
+    const safePid = String(p.ProductID).replace(/'/g,"\\'");
+
+    return `
+      <div class="prod">
+        <div class="prodTop">
+          <div class="thumb">${thumb}</div>
+          <div style="flex:1;min-width:0">
+            <div class="row" style="align-items:flex-start">
+              <div style="min-width:0">
+                <div class="title">${p.Nom||""}</div>
+                <div class="desc">${p.Description||""}</div>
+              </div>
+              <div class="price">${fmtHTG(p.Prix)}</div>
+            </div>
+            <div class="badges">
+              <span class="${badgeClass}">${p.Categorie||""}</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <button class="btn btnAdd" type="button" onclick="addToCart('${safePid}')">
+            Ajouter au panier
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
+/*********************
+ * CART UI
+ *********************/
+function renderCart(){
+  const cart = loadCart();
+  const items = cartToItems(cart);
+  const subTotal = cartSubtotal(cart);
+  const fee = getDeliveryFee();
+  const total = subTotal + fee;
+
+  $("total").textContent = fmtHTG(total);
+  updateFeeBox();
+
+  if(items.length === 0){
+    $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
+    validateCheckoutButton();
+    return;
+  }
+
+  $("cartItems").innerHTML = items.map(it=>{
+    const sub = Number(it.Prix||0) * Number(it.Quantite||0);
+    const pid = String(it.ProductID).replace(/'/g,"\\'");
+    return `
+      <div class="cartItem">
+        <div style="flex:1;min-width:0">
+          <div class="name">${it.Nom||""}</div>
+          <div class="sub">${fmtHTG(it.Prix)} × ${Number(it.Quantite||0)} = <b>${fmtHTG(sub)}</b></div>
+        </div>
+        <div class="miniBtns">
+          <button class="mini" type="button" onclick="qty('${pid}', ${Number(it.Quantite||1)-1})">−</button>
+          <button class="mini" type="button" onclick="qty('${pid}', ${Number(it.Quantite||1)+1})">+</button>
+          <button class="mini danger" type="button" onclick="rm('${pid}')">Retirer</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+    `;
+  }).join("");
+
+  validateCheckoutButton();
+}
+
+window.addToCart = function(productId){
+  hideErr(); clearToast();
+  const p = productById(productId);
+  if(!p || Number(p.Stock||0) <= 0){
+    toast("Produit indisponible (stock 0).");
+    setTimeout(clearToast, 1200);
+    return;
+  }
+  const cart = loadCart();
+  const pid = String(productId);
+  const next = (Number(cart[pid]||0) + 1);
+  const max = Math.max(1, Number(p.Stock||1));
+  cart[pid] = Math.min(next, max);
+  saveCart(cart);
+  renderCart();
+  toast("Ajouté au panier ✅");
+  setTimeout(clearToast, 900);
+};
+
+window.qty = function(productId, q){
+  hideErr(); clearToast();
+  const p = productById(productId);
+  const cart = loadCart();
+  const pid = String(productId);
+  const next = Number(q||0);
+
+  if(next <= 0){
+    delete cart[pid];
+  }else{
+    if(!p || Number(p.Stock||0) <= 0){
+      delete cart[pid];
+    }else{
+      const max = Math.max(1, Number(p.Stock||1));
+      cart[pid] = Math.min(next, max);
+    }
+  }
+  saveCart(cart);
+  renderCart();
+};
+
+window.rm = function(productId){
+  hideErr(); clearToast();
+  const cart = loadCart();
+  delete cart[String(productId)];
+  saveCart(cart);
+  renderCart();
+};
+
+/*********************
+ * Paiement obligatoire
+ *********************/
+function getSelectedPaymentMethod(){
+  const el = document.querySelector("input[name='pay']:checked");
+  return el ? String(el.value || "").trim() : "";
+}
+
+/*********************
+ * Validation
+ *********************/
+function validateCheckoutButton(){
+  const cart = loadCart();
+  const items = cartToItems(cart);
+  const subTotal = cartSubtotal(cart);
+
+  const paymentMethod = getSelectedPaymentMethod();
+  const nameOk = !!$("clientNom").value.trim();
+  const phoneOk = !!$("telephone").value.trim();
+
+  const liv = isLivraison();
+  const addrOk = !liv || !!$("adresse").value.trim();
+  const zoneOk = !liv || !!$("zoneLivraison").value.trim();
+
+  const ok = (items.length > 0 && subTotal > 0 && nameOk && phoneOk && paymentMethod && addrOk && zoneOk);
+  $("checkoutBtn").disabled = !ok;
+}
+
+/*********************
+ * WhatsApp + Message
+ *********************/
 function openWhatsApp(message){
   const url = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
   window.open(url, "_blank");
 }
 
-function buildQrText(payload, orderId){
-  const lines = [];
-  lines.push("BES FAST FOOD");
-  lines.push("ID: " + (orderId || "LOCAL-" + Date.now()));
-  lines.push("Nom: " + payload.clientNom);
-  lines.push("Tel: " + payload.telephone);
-  lines.push("Type: " + payload.typeCommande);
+function buildWhatsAppMessage(payload){
+  let msg = "🍔 BES FAST FOOD – NOUVELLE COMMANDE\n\n";
+  msg += "👤 Nom : " + payload.clientNom + "\n";
+  msg += "📞 Téléphone : " + payload.telephone + "\n\n";
+  msg += "🛍️ Commande :\n";
 
-  if(norm(payload.typeCommande)==="livraison"){
-    lines.push("Adresse: " + (payload.adresse || "-"));
-    lines.push("Zone: " + (payload.deliveryZoneLabel || payload.deliveryZone || "-"));
-    lines.push("Frais livraison: " + fmtHTG(payload.deliveryFee));
-  }
-
-  lines.push("Paiement: " + payload.paymentMethod);
-  lines.push("Sous-total: " + fmtHTG(payload.subTotal));
-  if(payload.deliveryFee>0) lines.push("Livraison: " + fmtHTG(payload.deliveryFee));
-  lines.push("Total: " + fmtHTG(payload.total));
-
-  lines.push("Produits:");
   payload.items.forEach(it=>{
-    lines.push("- " + it.Nom + " x" + it.Quantite + " (" + fmtHTG(Number(it.Prix)*Number(it.Quantite)) + ")");
+    const sub = Number(it.Prix||0) * Number(it.Quantite||0);
+    msg += "- " + it.Nom + " x" + it.Quantite + " = " + fmtHTG(sub) + "\n";
   });
 
-  if(payload.noteCommande) lines.push("Note: " + payload.noteCommande);
-
-  return lines.join("\n");
-}
-
-/* =========================
-   Reçu imprimé (livraison conditionnelle)
-========================= */
-function buildReceiptHTML(payload, orderId){
-  const isDel = (norm(payload.typeCommande)==="livraison");
-  const now = new Date().toLocaleString();
-
-  const itemsRows = payload.items.map(it=>{
-    const line = Number(it.Prix)*Number(it.Quantite);
-    return `
-      <tr>
-        <td>${it.Nom} x${it.Quantite}</td>
-        <td style="text-align:right">${fmtHTG(line)}</td>
-      </tr>
-    `;
-  }).join("");
-
-  const deliveryRow = isDel ? `
-    <tr>
-      <td>Livraison (${payload.deliveryZoneLabel || payload.deliveryZone || "-"})</td>
-      <td style="text-align:right">${fmtHTG(payload.deliveryFee)}</td>
-    </tr>
-    <tr>
-      <td colspan="2" style="padding-top:6px">
-        <b>Résumé livreur</b><br>
-        Nom: ${payload.clientNom}<br>
-        Tel: ${payload.telephone}<br>
-        Adresse: ${payload.adresse || "-"}<br>
-        Zone: ${payload.deliveryZoneLabel || "-"}
-      </td>
-    </tr>
-  ` : "";
-
-  return `
-<!doctype html>
-<html><head>
-<meta charset="utf-8"/>
-<title>Reçu</title>
-<style>
-  body{width:80mm;margin:0;font-family:Arial,sans-serif;color:#000}
-  h1{font-size:14px;text-align:center;margin:6px 0}
-  .small{font-size:11px}
-  table{width:100%;border-collapse:collapse;font-size:11px}
-  td{padding:3px 0;vertical-align:top}
-  .hr{border-top:1px dashed #000;margin:6px 0}
-</style>
-</head>
-<body>
-  <h1>BES FAST FOOD</h1>
-  <div class="small">Date: ${now}</div>
-  <div class="small">ID: ${orderId || "LOCAL-" + Date.now()}</div>
-  <div class="small">Nom: ${payload.clientNom}</div>
-  <div class="small">Tel: ${payload.telephone}</div>
-  <div class="small">Type: ${payload.typeCommande}</div>
-
-  ${isDel ? `<div class="small">Adresse: ${payload.adresse || "-"}</div>` : ""}
-
-  <div class="hr"></div>
-
-  <table>
-    ${itemsRows}
-    <tr><td colspan="2"><div class="hr"></div></td></tr>
-    <tr>
-      <td>Sous-total</td>
-      <td style="text-align:right">${fmtHTG(payload.subTotal)}</td>
-    </tr>
-    ${deliveryRow}
-    <tr>
-      <td><b>Total</b></td>
-      <td style="text-align:right"><b>${fmtHTG(payload.total)}</b></td>
-    </tr>
-  </table>
-
-  <div class="hr"></div>
-  <div class="small">Paiement: ${payload.paymentMethod}</div>
-  ${payload.noteCommande ? `<div class="small">Note: ${payload.noteCommande}</div>` : ""}
-  <div class="small" style="margin-top:8px;text-align:center">Merci 🙏</div>
-
-  <script>window.onload=()=>{window.print();};</script>
-</body></html>
-  `;
-}
-
-function printReceipt(){
-  const payload = state.lastOrderPayload;
-  if(!payload){
-    toast("Aucune commande à imprimer.");
-    return;
+  msg += "\n🧾 Sous-total : " + fmtHTG(payload.subTotal) + "\n";
+  if(payload.deliveryFee > 0){
+    msg += "🚚 Livraison (" + (payload.deliveryZoneLabel || payload.deliveryZone || "-") + ") : " + fmtHTG(payload.deliveryFee) + "\n";
   }
-  const html = buildReceiptHTML(payload, state.lastOrderId);
-  const w = window.open("", "_blank");
-  if(!w){
-    toast("Popup bloquée. Autorise les popups pour imprimer.");
-    return;
-  }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-}
+  msg += "💰 Total : " + fmtHTG(payload.total) + "\n";
+  msg += "💳 Paiement : " + payload.paymentMethod + "\n\n";
+  msg += "📍 Type : " + payload.typeCommande + "\n";
 
-/* =========================
-   QR MODAL (si le HTML existe)
-========================= */
-function openQrModal(text){
-  const modal = document.getElementById("qrModal");
-  const img = document.getElementById("qrImg");
-  const ta = document.getElementById("qrText");
-
-  if(!modal || !img || !ta){
-    // fallback si tu n'as pas encore collé le modal HTML
-    toast("QR prêt ✅ (ajoute le modal QR dans le HTML).");
-    console.log(text);
-    return;
+  if(norm(payload.typeCommande) === "livraison"){
+    msg += "🏠 Adresse : " + (payload.adresse || "-") + "\n";
   }
 
-  ta.value = text;
-  img.src = "https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=" + encodeURIComponent(text);
-  modal.style.display = "block";
+  if(payload.noteCommande){
+    msg += "\n📝 Note : " + payload.noteCommande + "\n";
+  }
+
+  // ✅ toujours afficher ce rappel
+  msg += "\n⚠️ Merci d’envoyer la preuve de paiement sur WhatsApp.\n";
+  return msg;
 }
 
-window.closeQrModal = function(){
-  const modal = document.getElementById("qrModal");
-  if(modal) modal.style.display = "none";
-};
-
-window.copyQrText = async function(){
-  try{
-    const t = document.getElementById("qrText").value;
-    await navigator.clipboard.writeText(t);
-    toast("Résumé copié ✅");
-  }catch(e){
-    toast("Copie impossible (navigateur).");
-  }
-};
-
-/* =========================
-   CHECKOUT
-========================= */
+/*********************
+ * CHECKOUT => WhatsApp + Sheets (sans image)
+ *********************/
 async function checkout(){
   try{
-    toast("");
+    hideErr(); clearToast();
+    $("checkoutBtn").disabled = true;
 
     const cart = loadCart();
-    const items = cartToItems(cart);
+    const itemsFull = cartToItems(cart);
     const subTotal = cartSubtotal(cart);
 
-    if(!items.length || subTotal<=0){
-      toast("Panier vide.");
+    if(itemsFull.length === 0 || subTotal <= 0){
+      showErr("Panier vide.");
       return;
     }
 
-    const clientNom = $("clientNom") ? $("clientNom").value.trim() : "";
-    const telephone = $("telephone") ? $("telephone").value.trim() : "";
-    const typeCommande = $("typeCommande") ? $("typeCommande").value : "";
-    const adresse = $("adresse") ? $("adresse").value.trim() : "";
-    const noteCommande = getNoteCommande();
-    const paymentMethod = getPaymentMethod();
-
-    if(!clientNom || !telephone){
-      toast("Nom et téléphone obligatoires.");
-      return;
-    }
+    const paymentMethod = getSelectedPaymentMethod();
     if(!paymentMethod){
-      toast("Choisis un mode de paiement.");
+      showErr("Choisis une méthode de paiement.");
       return;
     }
 
@@ -598,91 +954,157 @@ async function checkout(){
     const deliveryFee = liv ? (zone ? Number(zone.fee||0) : 0) : 0;
 
     if(liv && !zone){
-      toast("Choisis une zone de livraison.");
+      showErr("Choisis une zone de livraison.");
       return;
     }
-    if(liv && !adresse){
-      toast("Adresse obligatoire pour livraison.");
+    if(liv && !$("adresse").value.trim()){
+      showErr("Adresse obligatoire pour la livraison.");
       return;
     }
 
     const total = subTotal + deliveryFee;
 
     const payload = {
-      clientNom, telephone, typeCommande, adresse,
-      noteCommande,
+      guestId: state.guestId,
+      clientNom: $("clientNom").value.trim(),
+      telephone: $("telephone").value.trim(),
+      typeCommande: $("typeCommande").value,
+      adresse: $("adresse").value.trim(),
+      noteCommande: $("noteCommande").value.trim(),
       paymentMethod,
       subTotal,
       deliveryFee,
       deliveryZone: zone ? zone.key : "",
       deliveryZoneLabel: zone ? zone.label : "",
       total,
-      items
+      items: itemsFull.map(it => ({
+        ProductID: it.ProductID,
+        Nom: it.Nom,
+        Prix: it.Prix,
+        Quantite: it.Quantite
+      }))
     };
+
+    if(!payload.clientNom || !payload.telephone){
+      showErr("Nom et téléphone obligatoires.");
+      return;
+    }
+
+    setBusy(true);
 
     // 1) WhatsApp
     openWhatsApp(buildWhatsAppMessage(payload));
 
-    // 2) Sheets (facultatif)
+    // 2) Sheets
     let savedOrderId = "";
     try{
       const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
-      if(r && r.ok) savedOrderId = String(r.orderId||"");
-    }catch(e){}
+      if(r && r.ok){
+        savedOrderId = String(r.orderId || "");
+        toast("✅ Commande enregistrée sur Google Sheets (ID: " + (savedOrderId || "OK") + ")");
+      }else{
+        toast("WhatsApp ouvert ✅ (Sheets: échec)");
+      }
+    }catch(e){
+      toast("WhatsApp ouvert ✅ (Erreur Sheets)");
+    }
 
-    // sauvegarde pour reçu
-    state.lastOrderPayload = payload;
-    state.lastOrderId = savedOrderId || ("LOCAL-" + Date.now());
+    // QR Code (résumé)
+    const qrSummary =
+      "BES FAST FOOD | " +
+      "ID: " + (savedOrderId || ("LOCAL-" + Date.now())) + " | " +
+      "Nom: " + payload.clientNom + " | " +
+      "Tel: " + payload.telephone + " | " +
+      "Type: " + payload.typeCommande + " | " +
+      (norm(payload.typeCommande)==="livraison" ? ("Adr: " + (payload.adresse||"-") + " | ") : "") +
+      "Paiement: " + payload.paymentMethod + " | " +
+      "Total: " + fmtHTG(payload.total) + " | " +
+      "Items: " + payload.items.map(it => `${it.Nom}x${it.Quantite}`).join(", ");
 
-    // 3) QR (toutes infos)
-    const qrText = buildQrText(payload, state.lastOrderId);
-    openQrModal(qrText);
+    openQrModal(qrSummary);
 
-    // reset panier
+    // Reset
     clearCart();
     renderCart();
-
-    toast("Commande envoyée ✅");
+    $("clientNom").value = "";
+    $("telephone").value = "";
+    $("noteCommande").value = "";
+    $("adresse").value = "";
+    $("typeCommande").value = "Sur place";
+    $("zoneLivraison").value = "";
+    document.querySelectorAll("input[name='pay']").forEach(x=> x.checked = false);
+    syncAddressVisibility();
+    validateCheckoutButton();
+    setTimeout(clearToast, 4500);
 
   }catch(e){
-    toast("Erreur: " + (e.message||e));
+    showErr(e.message || e);
+  }finally{
+    setBusy(false);
+    validateCheckoutButton();
   }
 }
 
-/* =========================
-   BOOT
-========================= */
-(function init(){
-  // zoneLivraison: si existe déjà dans HTML => on remplit
-  const zoneSel = getZoneSelect();
-  if(zoneSel){
-    if(!zoneSel.dataset.filled){
-      zoneSel.innerHTML =
-        `<option value="">Zone de livraison…</option>` +
-        DELIVERY_ZONES.map(z => `<option value="${z.key}">${z.label} — ${fmtHTG(z.fee)}</option>`).join("");
-      zoneSel.dataset.filled = "1";
-    }
-  }
+/*********************
+ * BOOT
+ *********************/
+(function(){
+  state.guestId = getGuestId();
+  loadZonesUI();
 
-  // feeBox + printBtn
-  ensureFeeBox();
+  $("refreshBtn").onclick = () => { sanitizeCartAgainstStock(); renderCart(); };
+  $("checkoutBtn").onclick = checkout;
 
-  const printBtn = $("printBtn");
-  if(printBtn){
-    printBtn.addEventListener("click", printReceipt);
-  }
+  $("typeCommande").onchange = ()=>{
+    syncAddressVisibility();
+    renderCart();
+    validateCheckoutButton();
+  };
 
-  // events
-  const tc = $("typeCommande");
-  if(tc) tc.addEventListener("change", syncLivraisonUI);
-  if(zoneSel) zoneSel.addEventListener("change", renderCart);
+  $("zoneLivraison").onchange = ()=>{
+    updateFeeBox();
+    renderCart();
+    validateCheckoutButton();
+  };
 
-  const checkoutBtn = $("checkoutBtn");
-  if(checkoutBtn) checkoutBtn.addEventListener("click", checkout);
+  $("resetCartBtn").onclick = ()=>{
+    clearCart();
+    renderCart();
+    toast("Panier vidé ✅");
+    setTimeout(clearToast, 900);
+  };
 
-  // initial
-  loadMenu();
-  syncLivraisonUI();
+  $("clientNom").addEventListener("input", validateCheckoutButton);
+  $("telephone").addEventListener("input", validateCheckoutButton);
+  $("adresse").addEventListener("input", validateCheckoutButton);
+  $("noteCommande").addEventListener("input", validateCheckoutButton);
+
+  document.querySelectorAll("input[name='pay']").forEach(r=>{
+    r.addEventListener("change", validateCheckoutButton);
+  });
+
+  syncAddressVisibility();
   renderCart();
+  validateCheckoutButton();
+
+  loadMenuFromServer();
 })();
 </script>
+
+<div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; padding:18px;">
+  <div style="max-width:420px; margin:60px auto; background:#fff; border-radius:18px; padding:16px; border:1px solid rgba(0,0,0,.15);">
+    <div style="font-weight:1000; font-size:18px; margin-bottom:6px;">✅ Commande envoyée</div>
+    <div style="color:#6b7280; font-size:13px; margin-bottom:12px;">Voici ton QR Code (résumé commande).</div>
+    <div style="display:flex; justify-content:center; margin:12px 0;">
+      <img id="qrImg" alt="QR Code" style="width:260px; height:260px; border-radius:14px; border:1px solid rgba(0,0,0,.12);">
+    </div>
+    <textarea id="qrText" readonly style="width:100%; min-height:90px; font-size:12px;"></textarea>
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button type="button" class="btn" onclick="closeQrModal()">Fermer</button>
+      <button type="button" class="btn btnAdd" onclick="copyQrText()">Copier résumé</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
