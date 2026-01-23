@@ -758,16 +758,45 @@ window.printPOS80 = function(order){
 <title>POS 80mm</title>
 <style>
 @page { size: 80mm auto; margin: 6mm; }
-body{ width:80mm; font-family:Arial,sans-serif; margin:0; color:#000; }
-h1{text-align:center;font-size:16px;margin:0}
-.small{font-size:12px}
-.hr{border-top:1px dashed #000;margin:8px 0}
-table{width:100%;border-collapse:collapse;font-size:12px}
-td{padding:4px 0}
-td.qty{width:18mm;text-align:right}
-td.amt{width:28mm;text-align:right}
-.footer{text-align:center;margin-top:10px}
+body{
+  width:80mm;
+  font-family: Arial, sans-serif;
+  margin:0;
+  color:#000;
+  font-size:14px;            /* ✅ base plus grande */
+}
+h1{ text-align:center; font-size:20px; margin:0 0 4px 0; }  /* ✅ plus grand */
+.small{ font-size:13px; }                                   /* ✅ plus grand */
+.hr{ border-top:1px dashed #000; margin:10px 0; }
+table{ width:100%; border-collapse:collapse; font-size:14px; } /* ✅ plus grand */
+td{ padding:5px 0; }
+td.qty{ width:18mm; text-align:right; font-weight:700; }
+td.amt{ width:28mm; text-align:right; font-weight:700; }
+.footer{ text-align:center; margin-top:10px; font-size:13px; }
+
+/* ✅ Bloc livreur */
+.driverBox{
+  margin-top:10px;
+  border:2px solid #000;
+  padding:8px;
+}
+.driverTitle{
+  font-size:16px;
+  font-weight:900;
+  text-align:center;
+  margin-bottom:6px;
+}
+.driverLine{
+  font-size:16px;
+  font-weight:900;
+  margin:4px 0;
+}
+.driverLabel{
+  display:inline-block;
+  min-width:18mm;
+}
 </style>
+
 </head>
 <body>
 <h1>BES FAST FOOD</h1>
@@ -790,6 +819,14 @@ td.amt{width:28mm;text-align:right}
 <div class="hr"></div>
 
 <div class="small"><b>Total:</b> ${fmtHTG(order.Total||0)}</div>
+
+<div class="driverBox">
+  <div class="driverTitle">RÉSUMÉ LIVREUR</div>
+  <div class="driverLine"><span class="driverLabel">NOM:</span> ${escapeHtml(order.ClientNom||"")}</div>
+  <div class="driverLine"><span class="driverLabel">TEL:</span> ${escapeHtml(order.Telephone||"")}</div>
+  <div class="driverLine"><span class="driverLabel">ADR:</span> ${escapeHtml(order.Adresse||"-")}</div>
+</div>
+
 
 <div class="footer small">Merci d'avoir choisi BES Fast Food</div>
 
