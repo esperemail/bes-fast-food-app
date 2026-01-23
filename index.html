@@ -1,123 +1,3 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>BES Fast Food - Commande</title>
-
-<style>
-:root{
-  --y:#FFC107; --o:#FF9800; --r:#D32F2F; --g:#2E7D32;
-  --bg:#fff7e6; --card:#fff; --muted:#6b7280;
-  --radius:18px; --shadow:0 12px 30px rgba(0,0,0,.12);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:var(--bg);
-}
-header{
-  background:linear-gradient(90deg,var(--y),var(--o));
-  padding:14px;
-}
-.topbar{
-  max-width:1100px;margin:auto;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:54px;height:54px;border-radius:14px;
-  background:#fff;display:flex;align-items:center;justify-content:center;
-  font-weight:900;
-}
-.wrap{max-width:1100px;margin:auto;padding:16px}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:14px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:14px;
-}
-.muted{color:var(--muted);font-size:13px}
-input,select,textarea{
-  width:100%;padding:10px;border-radius:12px;
-  border:1px solid #ddd;font-size:14px;
-}
-button{
-  padding:12px;border-radius:14px;
-  border:none;font-weight:900;cursor:pointer;
-}
-.btnPrimary{
-  background:var(--r);color:#fff;
-}
-.btnGhost{
-  background:#eee;
-}
-.hr{height:1px;background:#eee;margin:12px 0}
-</style>
-</head>
-
-<body>
-
-<header>
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo">BES</div>
-      <b>Fast Food</b>
-    </div>
-    <div class="muted">Commande en ligne rapide et pro</div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="grid">
-
-    <!-- MENU -->
-    <div class="card">
-      <h3>Menu</h3>
-      <div id="products" class="muted">Chargement…</div>
-    </div>
-
-    <!-- PANIER -->
-    <div class="card" id="cartCard">
-      <h3>Panier</h3>
-      <div id="cartItems" class="muted">Panier vide</div>
-
-      <div class="hr"></div>
-      <b>Total : <span id="total">0 HTG</span></b>
-
-      <div class="hr"></div>
-
-      <input id="clientNom" placeholder="Nom">
-      <input id="telephone" placeholder="Téléphone">
-
-      <select id="typeCommande">
-        <option>Sur place</option>
-        <option>À emporter</option>
-        <option>Livraison</option>
-      </select>
-
-      <textarea id="adresse" placeholder="Adresse livraison (si livraison)"></textarea>
-
-      <select id="paiement">
-        <option value="">Paiement</option>
-        <option>MonCash</option>
-        <option>NatCash</option>
-        <option>Cash</option>
-        <option>Crédit</option>
-      </select>
-
-      <div class="hr"></div>
-
-      <button id="checkoutBtn" class="btnPrimary">Envoyer la commande</button>
-      <div id="toast" class="muted"></div>
-    </div>
-
-  </div>
-</div>
 <script>
 /* =========================
    CONFIG
@@ -148,6 +28,9 @@ const state = {
   lastOrderId: ""
 };
 
+/* =========================
+   HELPERS
+========================= */
 const $ = (id)=>document.getElementById(id);
 const norm = (s)=>String(s||"").toLowerCase().trim();
 
@@ -158,15 +41,27 @@ function fmtHTG(n){
 
 function toast(msg){
   const t = $("toast");
+  if(!t) return;
   t.textContent = String(msg||"");
+  // si ton CSS mettait display:none, on l'affiche
+  t.style.display = (msg ? "block" : "none");
+}
+</script>
+<script>
+/* =========================
+   LIVRAISON helpers
+========================= */
+function isLivraison(){
+  const tc = $("typeCommande");
+  return tc ? (norm(tc.value) === "livraison") : false;
 }
 
-function isLivraison(){
-  return norm($("typeCommande").value) === "livraison";
+function getZoneSelect(){
+  return $("zoneLivraison"); // existe dans ton HTML (ou injecté plus bas)
 }
 
 function getSelectedZone(){
-  const z = $("zoneLivraison");
+  const z = getZoneSelect();
   if(!z) return null;
   const key = String(z.value||"").trim();
   return DELIVERY_ZONES.find(x => x.key === key) || null;
@@ -178,140 +73,181 @@ function getDeliveryFee(){
   return z ? Number(z.fee||0) : 0;
 }
 
+function ensureFeeBox(){
+  let fb = $("feeBox");
+  if(fb) return fb;
+
+  // si pas dans HTML, on le crée proche du total si possible
+  fb = document.createElement("div");
+  fb.id = "feeBox";
+
+  // essaye de le placer avant le bouton checkout, sinon à la fin du cart
+  const checkoutBtn = $("checkoutBtn");
+  if(checkoutBtn && checkoutBtn.parentElement){
+    checkoutBtn.parentElement.insertBefore(fb, checkoutBtn);
+  }else{
+    const cart = $("cartCard") || document.body;
+    cart.appendChild(fb);
+  }
+  return fb;
+}
+
 function syncLivraisonUI(){
   const liv = isLivraison();
-  $("adresse").style.display = liv ? "block" : "none";
-  $("zoneLivraison").style.display = liv ? "block" : "none";
-  $("adresse").disabled = !liv;
-  $("zoneLivraison").disabled = !liv;
+
+  // meilleur: si tu as un wrapper addrWrap, on l'utilise
+  const wrap = $("addrWrap");
+  const adresse = $("adresse");
+  const zoneSel = getZoneSelect();
+
+  if(wrap){
+    wrap.style.display = liv ? "block" : "none";
+  }else{
+    // fallback: on cache/affiche les champs individuellement
+    if(adresse) adresse.style.display = liv ? "block" : "none";
+    if(zoneSel) zoneSel.style.display = liv ? "block" : "none";
+  }
+
+  if(adresse) adresse.disabled = !liv;
+  if(zoneSel) zoneSel.disabled = !liv;
 
   if(!liv){
-    $("adresse").value = "";
-    $("zoneLivraison").value = "";
-    $("feeBox").style.display = "none";
+    if(adresse) adresse.value = "";
+    if(zoneSel) zoneSel.value = "";
+  }
+
+  // feeBox UI
+  const fb = ensureFeeBox();
+  if(!liv){
+    fb.style.display = "none";
+    fb.innerHTML = "";
   }else{
-    $("feeBox").style.display = "block";
+    fb.style.display = "block";
   }
+
   renderCart();
 }
-
+</script>
+<script>
 /* =========================
-   CART (localStorage)
+   LIVRAISON helpers
 ========================= */
-function loadCart(){
-  try{
-    const raw = localStorage.getItem(CART_KEY);
-    if(!raw) return {};
-    const obj = JSON.parse(raw);
-    return (obj && typeof obj === "object") ? obj : {};
-  }catch(e){ return {}; }
-}
-function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c||{})); }
-function clearCart(){ localStorage.removeItem(CART_KEY); }
-
-function productById(pid){
-  return state.productsById.get(String(pid)) || null;
+function isLivraison(){
+  const tc = $("typeCommande");
+  return tc ? (norm(tc.value) === "livraison") : false;
 }
 
-function cartToItems(cartObj){
-  const items = [];
-  for(const [pid, qty] of Object.entries(cartObj||{})){
-    const p = productById(pid);
-    if(!p) continue;
-    items.push({
-      ProductID: String(p.ProductID),
-      Nom: p.Nom,
-      Prix: Number(p.Prix||0),
-      Quantite: Math.max(1, Number(qty||1))
-    });
+function getZoneSelect(){
+  return $("zoneLivraison"); // existe dans ton HTML (ou injecté plus bas)
+}
+
+function getSelectedZone(){
+  const z = getZoneSelect();
+  if(!z) return null;
+  const key = String(z.value||"").trim();
+  return DELIVERY_ZONES.find(x => x.key === key) || null;
+}
+
+function getDeliveryFee(){
+  if(!isLivraison()) return 0;
+  const z = getSelectedZone();
+  return z ? Number(z.fee||0) : 0;
+}
+
+function ensureFeeBox(){
+  let fb = $("feeBox");
+  if(fb) return fb;
+
+  // si pas dans HTML, on le crée proche du total si possible
+  fb = document.createElement("div");
+  fb.id = "feeBox";
+
+  // essaye de le placer avant le bouton checkout, sinon à la fin du cart
+  const checkoutBtn = $("checkoutBtn");
+  if(checkoutBtn && checkoutBtn.parentElement){
+    checkoutBtn.parentElement.insertBefore(fb, checkoutBtn);
+  }else{
+    const cart = $("cartCard") || document.body;
+    cart.appendChild(fb);
   }
-  return items;
+  return fb;
 }
 
-function cartSubtotal(cartObj){
-  let total = 0;
-  for(const [pid, qty] of Object.entries(cartObj||{})){
-    const p = productById(pid);
-    if(!p) continue;
-    total += Number(p.Prix||0) * Math.max(1, Number(qty||1));
+function syncLivraisonUI(){
+  const liv = isLivraison();
+
+  // meilleur: si tu as un wrapper addrWrap, on l'utilise
+  const wrap = $("addrWrap");
+  const adresse = $("adresse");
+  const zoneSel = getZoneSelect();
+
+  if(wrap){
+    wrap.style.display = liv ? "block" : "none";
+  }else{
+    // fallback: on cache/affiche les champs individuellement
+    if(adresse) adresse.style.display = liv ? "block" : "none";
+    if(zoneSel) zoneSel.style.display = liv ? "block" : "none";
   }
-  return total;
-}
 
+  if(adresse) adresse.disabled = !liv;
+  if(zoneSel) zoneSel.disabled = !liv;
+
+  if(!liv){
+    if(adresse) adresse.value = "";
+    if(zoneSel) zoneSel.value = "";
+  }
+
+  // feeBox UI
+  const fb = ensureFeeBox();
+  if(!liv){
+    fb.style.display = "none";
+    fb.innerHTML = "";
+  }else{
+    fb.style.display = "block";
+  }
+
+  renderCart();
+}
+</script>
+<script>
 /* =========================
-   MENU (UI)
+   CART UI + frais livraison
 ========================= */
-function renderProducts(){
-  const box = $("products");
-  if(!state.products.length){
-    box.innerHTML = `<div class="muted">Aucun produit.</div>`;
-    return;
-  }
-
-  box.innerHTML = state.products.map(p => `
-    <div style="padding:10px;border:1px solid #eee;border-radius:14px;margin:10px 0">
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
-        <div style="min-width:0">
-          <div style="font-weight:900">${p.Nom}</div>
-          <div class="muted">${p.Description||""}</div>
-        </div>
-        <div style="font-weight:900;white-space:nowrap">${fmtHTG(p.Prix)}</div>
-      </div>
-      <button style="margin-top:10px;width:100%;background:#111;color:#fff"
-        onclick="addToCart('${String(p.ProductID).replace(/'/g,"")}')">Ajouter au panier</button>
-    </div>
-  `).join("");
-}
-
-window.addToCart = function(productId){
-  const cart = loadCart();
-  const pid = String(productId);
-  cart[pid] = (Number(cart[pid]||0) + 1);
-  saveCart(cart);
-  renderCart();
-  toast("Ajouté ✅");
-};
-
-window.qty = function(productId, q){
-  const cart = loadCart();
-  const pid = String(productId);
-  const next = Number(q||0);
-  if(next <= 0) delete cart[pid];
-  else cart[pid] = next;
-  saveCart(cart);
-  renderCart();
-};
-
 function renderCart(){
+  const totalEl = $("total");
+  const cartItemsEl = $("cartItems");
+  if(!totalEl || !cartItemsEl) return;
+
   const cart = loadCart();
   const items = cartToItems(cart);
   const sub = cartSubtotal(cart);
   const fee = getDeliveryFee();
   const total = sub + fee;
 
-  $("total").textContent = fmtHTG(total);
+  totalEl.textContent = fmtHTG(total);
 
-  // frais livraison + résumé livreur (SEULEMENT si livraison)
+  // frais livraison (SEULEMENT si livraison)
+  const fb = ensureFeeBox();
   if(isLivraison()){
     const z = getSelectedZone();
-    $("feeBox").style.display = "block";
-    $("feeBox").innerHTML = `
+    fb.style.display = "block";
+    fb.innerHTML = `
       <div style="padding:10px;border-radius:12px;background:#fff6d7;border:1px solid #f2e2a8;margin-top:10px">
         🚚 Frais livraison : <b>${fmtHTG(fee)}</b><br>
         📌 Zone : <b>${z ? z.label : "Choisir une zone"}</b>
       </div>
     `;
   }else{
-    $("feeBox").style.display = "none";
-    $("feeBox").innerHTML = "";
+    fb.style.display = "none";
+    fb.innerHTML = "";
   }
 
   if(!items.length){
-    $("cartItems").innerHTML = `<div class="muted">Panier vide</div>`;
+    cartItemsEl.innerHTML = `<div class="muted">Panier vide</div>`;
     return;
   }
 
-  $("cartItems").innerHTML = items.map(it=>{
+  cartItemsEl.innerHTML = items.map(it=>{
     const line = Number(it.Prix)*Number(it.Quantite);
     return `
       <div style="display:flex;justify-content:space-between;gap:10px;margin:10px 0">
@@ -320,15 +256,16 @@ function renderCart(){
           <div class="muted">${fmtHTG(it.Prix)} × ${it.Quantite} = <b>${fmtHTG(line)}</b></div>
         </div>
         <div style="display:flex;gap:8px">
-          <button class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite-1})">−</button>
-          <button class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite+1})">+</button>
+          <button type="button" class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite-1})">−</button>
+          <button type="button" class="btnGhost" onclick="qty('${it.ProductID}',${it.Quantite+1})">+</button>
         </div>
       </div>
       <div class="hr"></div>
     `;
   }).join("");
 }
-
+</script>
+<script>
 /* =========================
    API JSONP (Apps Script)
 ========================= */
@@ -375,7 +312,6 @@ function apiJsonp(action, params = {}) {
 }
 
 async function loadMenu(){
-  // si API disponible => getMenu
   try{
     const r = await apiJsonp("getMenu", {});
     if(r && r.ok && Array.isArray(r.products)){
@@ -394,7 +330,7 @@ async function loadMenu(){
     // fallback
   }
 
-  // fallback local si API indispo
+  // fallback local
   state.products = [
     {ProductID:"1", Nom:"Wings Simple", Prix:750, Description:"Wings BBQ"},
     {ProductID:"2", Nom:"Gratiné", Prix:900, Description:"Gratiné maison"}
@@ -404,7 +340,30 @@ async function loadMenu(){
 }
 
 /* =========================
-   WHATSAPP message (complet)
+   Paiement (corrigé)
+   - supporte radios name="pay"
+   - supporte aussi select id="paiement" si tu l'as
+========================= */
+function getPaymentMethod(){
+  // 1) radio
+  const r = document.querySelector("input[name='pay']:checked");
+  if(r) return String(r.value||"").trim();
+
+  // 2) select
+  const s = $("paiement");
+  if(s) return String(s.value||"").trim();
+
+  return "";
+}
+
+function getNoteCommande(){
+  const n = $("noteCommande");
+  return n ? String(n.value||"").trim() : "";
+}
+</script>
+<script>
+/* =========================
+   WhatsApp + QR + Reçu
 ========================= */
 function buildWhatsAppMessage(payload){
   let msg = "🍔 BES FAST FOOD – NOUVELLE COMMANDE\n\n";
@@ -438,9 +397,6 @@ function openWhatsApp(message){
   window.open(url, "_blank");
 }
 
-/* =========================
-   QR TEXT (TOUTES INFOS)
-========================= */
 function buildQrText(payload, orderId){
   const lines = [];
   lines.push("BES FAST FOOD");
@@ -471,7 +427,7 @@ function buildQrText(payload, orderId){
 }
 
 /* =========================
-   REÇU IMPRIMÉ (conditionnel livraison)
+   Reçu imprimé (livraison conditionnelle)
 ========================= */
 function buildReceiptHTML(payload, orderId){
   const isDel = (norm(payload.typeCommande)==="livraison");
@@ -548,9 +504,7 @@ function buildReceiptHTML(payload, orderId){
   ${payload.noteCommande ? `<div class="small">Note: ${payload.noteCommande}</div>` : ""}
   <div class="small" style="margin-top:8px;text-align:center">Merci 🙏</div>
 
-  <script>
-    window.onload = ()=>{ window.print(); };
-  </script>
+  <script>window.onload=()=>{window.print();};</script>
 </body></html>
   `;
 }
@@ -573,7 +527,42 @@ function printReceipt(){
 }
 
 /* =========================
-   CHECKOUT (WhatsApp + Sheets + QR + Reçu)
+   QR MODAL (si le HTML existe)
+========================= */
+function openQrModal(text){
+  const modal = document.getElementById("qrModal");
+  const img = document.getElementById("qrImg");
+  const ta = document.getElementById("qrText");
+
+  if(!modal || !img || !ta){
+    // fallback si tu n'as pas encore collé le modal HTML
+    toast("QR prêt ✅ (ajoute le modal QR dans le HTML).");
+    console.log(text);
+    return;
+  }
+
+  ta.value = text;
+  img.src = "https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=" + encodeURIComponent(text);
+  modal.style.display = "block";
+}
+
+window.closeQrModal = function(){
+  const modal = document.getElementById("qrModal");
+  if(modal) modal.style.display = "none";
+};
+
+window.copyQrText = async function(){
+  try{
+    const t = document.getElementById("qrText").value;
+    await navigator.clipboard.writeText(t);
+    toast("Résumé copié ✅");
+  }catch(e){
+    toast("Copie impossible (navigateur).");
+  }
+};
+
+/* =========================
+   CHECKOUT
 ========================= */
 async function checkout(){
   try{
@@ -588,12 +577,12 @@ async function checkout(){
       return;
     }
 
-    const clientNom = $("clientNom").value.trim();
-    const telephone = $("telephone").value.trim();
-    const typeCommande = $("typeCommande").value;
-    const adresse = $("adresse").value.trim();
-    const noteCommande = ""; // (si tu veux ajouter champ note plus tard)
-    const paymentMethod = $("paiement").value;
+    const clientNom = $("clientNom") ? $("clientNom").value.trim() : "";
+    const telephone = $("telephone") ? $("telephone").value.trim() : "";
+    const typeCommande = $("typeCommande") ? $("typeCommande").value : "";
+    const adresse = $("adresse") ? $("adresse").value.trim() : "";
+    const noteCommande = getNoteCommande();
+    const paymentMethod = getPaymentMethod();
 
     if(!clientNom || !telephone){
       toast("Nom et téléphone obligatoires.");
@@ -638,9 +627,7 @@ async function checkout(){
     let savedOrderId = "";
     try{
       const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
-      if(r && r.ok){
-        savedOrderId = String(r.orderId||"");
-      }
+      if(r && r.ok) savedOrderId = String(r.orderId||"");
     }catch(e){}
 
     // sauvegarde pour reçu
@@ -649,12 +636,13 @@ async function checkout(){
 
     // 3) QR (toutes infos)
     const qrText = buildQrText(payload, state.lastOrderId);
-    openQrModal(qrText); // modal ajouté en PARTIE 3
+    openQrModal(qrText);
 
     // reset panier
     clearCart();
     renderCart();
-    toast("Commande envoyée ✅ (QR affiché)");
+
+    toast("Commande envoyée ✅");
 
   }catch(e){
     toast("Erreur: " + (e.message||e));
@@ -662,76 +650,35 @@ async function checkout(){
 }
 
 /* =========================
-   QR MODAL hooks (le HTML est en PARTIE 3)
-========================= */
-function ensureQrModalExists(){
-  if(document.getElementById("qrModal")) return;
-
-  // Si la PARTIE 3 n'est pas encore collée, on ne casse pas le site.
-  // Le modal sera disponible après collage complet.
-}
-
-function openQrModal(text){
-  ensureQrModalExists();
-  const modal = document.getElementById("qrModal");
-  const img = document.getElementById("qrImg");
-  const ta = document.getElementById("qrText");
-  if(!modal || !img || !ta){
-    // fallback: si le modal n'existe pas, on affiche juste le texte
-    toast("QR prêt (colle la PARTIE 3 pour afficher le modal).");
-    console.log(text);
-    return;
-  }
-
-  ta.value = text;
-  img.src = "https://chart.googleapis.com/chart?cht=qr&chs=260x260&chl=" + encodeURIComponent(text);
-  modal.style.display = "block";
-}
-
-window.closeQrModal = function(){
-  const modal = document.getElementById("qrModal");
-  if(modal) modal.style.display = "none";
-};
-
-window.copyQrText = async function(){
-  try{
-    const t = document.getElementById("qrText").value;
-    await navigator.clipboard.writeText(t);
-    toast("Résumé copié ✅");
-  }catch(e){
-    toast("Copie impossible (navigateur).");
-  }
-};
-
-/* =========================
    BOOT
 ========================= */
 (function init(){
-  // Inject UI livraison (zone + feeBox) + bouton impression reçu
-  const adresse = $("adresse");
-  const zoneSel = document.createElement("select");
-  zoneSel.id = "zoneLivraison";
-  zoneSel.innerHTML =
-    `<option value="">Zone de livraison…</option>` +
-    DELIVERY_ZONES.map(z => `<option value="${z.key}">${z.label} — ${fmtHTG(z.fee)}</option>`).join("");
-  adresse.insertAdjacentElement("afterend", zoneSel);
+  // zoneLivraison: si existe déjà dans HTML => on remplit
+  const zoneSel = getZoneSelect();
+  if(zoneSel){
+    if(!zoneSel.dataset.filled){
+      zoneSel.innerHTML =
+        `<option value="">Zone de livraison…</option>` +
+        DELIVERY_ZONES.map(z => `<option value="${z.key}">${z.label} — ${fmtHTG(z.fee)}</option>`).join("");
+      zoneSel.dataset.filled = "1";
+    }
+  }
 
-  const feeBox = document.createElement("div");
-  feeBox.id = "feeBox";
-  $("cartCard").insertBefore(feeBox, $("checkoutBtn"));
+  // feeBox + printBtn
+  ensureFeeBox();
 
-  const printBtn = document.createElement("button");
-  printBtn.id = "printBtn";
-  printBtn.className = "btnGhost";
-  printBtn.style.marginTop = "10px";
-  printBtn.textContent = "Imprimer reçu";
-  printBtn.onclick = printReceipt;
-  $("checkoutBtn").insertAdjacentElement("afterend", printBtn);
+  const printBtn = $("printBtn");
+  if(printBtn){
+    printBtn.addEventListener("click", printReceipt);
+  }
 
   // events
-  $("typeCommande").addEventListener("change", syncLivraisonUI);
-  $("zoneLivraison").addEventListener("change", renderCart);
-  $("checkoutBtn").addEventListener("click", checkout);
+  const tc = $("typeCommande");
+  if(tc) tc.addEventListener("change", syncLivraisonUI);
+  if(zoneSel) zoneSel.addEventListener("change", renderCart);
+
+  const checkoutBtn = $("checkoutBtn");
+  if(checkoutBtn) checkoutBtn.addEventListener("click", checkout);
 
   // initial
   loadMenu();
@@ -739,29 +686,3 @@ window.copyQrText = async function(){
   renderCart();
 })();
 </script>
-<!-- =========================
-     QR MODAL (après </script>)
-========================= -->
-<div id="qrModal"
-  style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; padding:18px;">
-  <div
-    style="max-width:420px; margin:60px auto; background:#fff; border-radius:18px; padding:16px; border:1px solid rgba(0,0,0,.15);">
-    <div style="font-weight:1000; font-size:18px; margin-bottom:6px;">✅ Commande envoyée</div>
-    <div style="color:#6b7280; font-size:13px; margin-bottom:12px;">Voici ton QR Code (résumé complet).</div>
-
-    <div style="display:flex; justify-content:center; margin:12px 0;">
-      <img id="qrImg" alt="QR Code"
-        style="width:260px; height:260px; border-radius:14px; border:1px solid rgba(0,0,0,.12);">
-    </div>
-
-    <textarea id="qrText" readonly style="width:100%; min-height:120px; font-size:12px;"></textarea>
-
-    <div style="display:flex; gap:10px; margin-top:12px;">
-      <button type="button" class="btnGhost" onclick="closeQrModal()">Fermer</button>
-      <button type="button" class="btnPrimary" onclick="copyQrText()">Copier résumé</button>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
