@@ -199,7 +199,7 @@
         <button class="tab" data-tab="place">Placer une commande</button>
          <button class="tab" data-tab="closeDay">Clôture journée</button>
           <button class="tab" data-tab="histTx">Historique transactions</button>
-          <button class="tab" data-tab="histRep">Historique rapports</button
+          <button class="tab" data-tab="histRep">Historique rapports</button>
       </div>
 
       <div class="row" style="flex:1;justify-content:flex-end">
@@ -270,7 +270,7 @@
                 <button class="btn" id="reloadProductsBtn" type="button">Recharger</button>
               </div>
             </div>
-            <div class="content" id="productsBox" class="muted">Chargement…</div>
+            <div id="productsBox" class="content muted">Chargement…</div>
           </div>
 
           <div class="card">
@@ -721,7 +721,7 @@ document.querySelectorAll(".tab").forEach(btn=>{
     if(tab==="place") loadMenuForPlace();    
     if(tab==="closeDay") initCloseDayUI();
     if(tab==="histTx") loadTxHistory();
-    if(tab==="histRep") loadReportsHistory()
+    if(tab==="histRep") loadReportsHistory();
   });
 });
 
@@ -732,7 +732,7 @@ $("refreshBtn").addEventListener("click", ()=>{
   if(active==="place") loadMenuForPlace();
   if(active==="closeDay") initCloseDayUI();
   if(active==="histTx") loadTxHistory();
-  if(active==="histRep") loadReportsHistory()
+  if(active==="histRep") loadReportsHistory();
 });
 $("statusFilter").addEventListener("change", loadOrders);
 
@@ -1455,7 +1455,13 @@ $("placeOrderBtn").addEventListener("click", async ()=>{
   syncPlaceDeliveryUI();
   loadOrders();
 })();
+  })(); // fin Boot
+
+/****************
+ * Close Day
+ ****************/
 let _cd_lastPreview = null;
+
 
 function todayISO(){
   const d = new Date();
