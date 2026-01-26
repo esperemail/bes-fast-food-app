@@ -815,16 +815,6 @@ function filterOrders(list){
 async function loadPendingOrders(){
   try{
     const k = $("adminKey").value.trim();
-
-    // Option 1 (OK): via admin_listOrders + status="En attente"
-    const r = await apiJsonp("admin_listOrders", { k, limit:"200", status:"En attente" });
-
-    // Option 2 (mieux): si tu veux utiliser ton endpoint dédié:
-    // const r = await apiJsonp("admin_listPendingOrders", { k, limit:"200" });
-
-    async function loadPendingOrders(){
-  try{
-    const k = $("adminKey").value.trim();
     const r = await apiJsonp("admin_listOrders", { k, limit:"200", status:"En attente" });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur chargement En attente");
 
@@ -837,7 +827,6 @@ async function loadPendingOrders(){
     $("pendingTbody").innerHTML = `<tr><td colspan="5" class="muted">Erreur.</td></tr>`;
   }
 }
-
 
 function renderPendingTable(list){
   $("pendingTbody").innerHTML = list.length
