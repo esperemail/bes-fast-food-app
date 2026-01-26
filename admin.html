@@ -973,6 +973,50 @@ window.setStatus = async function(orderId, status){
     throw e;
   }
 };
+// ✅ Modifier: ouvre l’onglet "Placer une commande" et pré-remplit le nom/tel
+// (si tu as un endpoint qui renvoie le détail d'une commande, on pourra le faire complet)
+window.editPending = async function(orderId){
+  try{
+    toast("Mode modification (simple) : " + orderId);
+
+    // 👉 Option simple: juste basculer vers l’onglet "Placer une commande"
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    document.querySelector('.tab[data-tab="place"]').classList.add("active");
+
+    $("tab-orders").style.display   = "none";
+    $("tab-pending").style.display  = "none";
+    $("tab-products").style.display = "none";
+    $("tab-place").style.display    = "block";
+    $("tab-closeDay").style.display = "none";
+    $("tab-histTx").style.display   = "none";
+    $("tab-histRep").style.display  = "none";
+
+    // Si tu veux: charger menu pour pouvoir re-créer la commande
+    await loadMenuForPlace();
+
+    // Ici, sans endpoint "getPendingOrder", je ne peux pas pré-remplir items/infos.
+    // On peut l'ajouter côté Apps Script pour un vrai edit.
+  }catch(e){
+    showErr(e.message || e);
+  }
+};
+
+// ✅ Finaliser: met juste le statut (adapte au statut final que tu veux)
+window.finalizePending = async function(orderId){
+  try{
+    if(!confirm("Finaliser cette commande ?")) return;
+
+    // Choisis le statut final que tu veux au moment où elle sort de "En attente"
+    await setStatus(orderId, "Reçue");
+    toast("Commande finalisée ✅");
+
+    // Recharge la liste
+    loadPendingOrders();
+    loadOrders();
+  }catch(e){
+    showErr(e.message || e);
+  }
+};
 
 window.readyConsume = async function(order){
   try{
