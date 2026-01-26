@@ -221,7 +221,7 @@
           <option>Prêt à emporter</option>
           <option>Prêt à livrer</option>
           <option>Livré</option>
-          <option>Annuler</option>
+          <option>Annulée</option>
         </select>
       </div>
     </div>
@@ -452,8 +452,10 @@
               </div>
 
               <div style="margin-top:12px">
-                <button class="btn good" type="button" id="placeOrderBtn" disabled>Enregistrer (Sheets)</button>
-              </div>
+<div class="row" style="gap:10px">
+  <button class="btn warn" type="button" id="placePendingBtn">Unregister / En attente</button>
+  <button class="btn good" type="button" id="placeOrderBtn" disabled>Enregistrer (Sheets)</button>
+</div>              </div>
             </div>
           </div>
         </div>
@@ -474,7 +476,7 @@
       </div>
       <div class="content">
         <div class="muted small">
-          Les commandes <b>Annuler</b> ne sont pas comptées comme ventes.
+          Les commandes <b>Annulée</b> ne sont pas comptées comme ventes.
         </div>
         <div class="hr"></div>
 
@@ -758,8 +760,9 @@ function rowClassForStatus(status){
 function sortOrdersForDisplay(list){
   const clone = [...(list||[])];
   clone.sort((a,b)=>{
-    const aDelivered = norm(a.Statut) === "livré";
-    const bDelivered = norm(b.Statut) === "livré";
+const aDelivered = norm(a.Statut).includes("livr");
+const bDelivered = norm(b.Statut).includes("livr");
+
     if(aDelivered !== bDelivered) return aDelivered ? 1 : -1; // livré => bas
     return String(b.DateHeure||"").localeCompare(String(a.DateHeure||""));
   });
@@ -772,7 +775,8 @@ function filterOrders(list){
   const hideDel = !!$("hideDelivered").checked;
 
   return (list||[]).filter(o=>{
-    if(hideDel && norm(o.Statut) === "livré") return false;
+    if(hideDel && norm(o.Statut).includes("livr")) return false;
+
     if(q && !String(o.OrderID||"").includes(q)) return false;
     return true;
   });
@@ -829,7 +833,7 @@ function renderOrdersTable(ordersRaw){
     const isNew = (!prevOrderIds.has(oid)) && (/reç|recu/i.test(st));
     const trClass = (isNew ? "is-new " : "") + rowClassForStatus(st);
 
-    const deliveredChecked = /livré/i.test(st);
+   const deliveredChecked = norm(st).includes("livr");
 
     return `
       <tr class="${trClass}">
@@ -862,7 +866,7 @@ function renderOrdersTable(ordersRaw){
 
             <button class="btn" type="button" onclick='printPOS80(${safeOrderJson})'>Imprimer 80mm</button>
 
-            <button class="btn bad" type="button" onclick="setStatus('${oid.replace(/'/g,"")}', 'Annuler')">Annuler</button>
+            <button class="btn bad" type="button" onclick="setStatus('${oid.replace(/'/g,"")}', 'Annulée')">Annuler</button>
           </div>
         </td>
       </tr>
@@ -1371,6 +1375,67 @@ $("clearPlaceCartBtn").addEventListener("click", ()=>{
   renderPlaceCart();
   toast("Panier vidé ✅");
 });
+$("placePendingBtn").addEventListener("click", async ()=>{
+  try{
+    const k = $("adminKey").value.trim();
+
+    const items = Object.entries(placeCart).map(([ProductID, Quantite])=>({ ProductID, Quantite }));
+    if(items.length===0) throw new Error("Panier vide");
+
+    const typeCommande = $("p_type").value;
+    const isLiv = norm(typeCommande)==="livraison";
+    if(!$("p_name").value.trim()) throw new Error("Nom obligatoire.");
+
+    const zone = $("p_zone").value.trim();
+    const addr = $("p_addr").value.trim();
+
+    if(isLiv && !zone) throw new Error("Zone de livraison obligatoire.");
+    if(isLiv && !addr) throw new Error("Adresse obligatoire.");
+
+    const fee = getDeliveryFee();
+    const sub = calcPlaceSubtotal();
+    const total = sub + fee;
+    const baseNote = $("p_note").value.trim();
+    const deliveryNote = isLiv ? `Zone: ${zone} | Frais livraison: ${fmtHTG(fee)}` : "";
+    const noteCommande = [baseNote, deliveryNote].filter(Boolean).join(" | ");
+
+    const payload = {
+      guestId: "admin-pos",
+      clientNom: $("p_name").value.trim(),
+      telephone: $("p_phone").value.trim(),
+      typeCommande,
+      adresse: isLiv ? `${zone} — ${addr}` : "",
+      noteCommande,
+      paymentMethod: $("p_pay").value.trim() || "", // peut être vide en attente
+      items,
+      deliveryZone: isLiv ? zone : "",
+      deliveryFee: isLiv ? fee : 0
+      totalOverride: total
+    };
+
+    const r = await apiJsonp("admin_createPendingOrder", { k, payload: JSON.stringify(payload) });
+    if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_createPendingOrder");
+
+    toast("Commande mise en attente ✅ ID: " + (r.orderId || "OK"));
+
+    // reset panier / champs
+    for(const k2 of Object.keys(placeCart)) delete placeCart[k2];
+    $("p_note").value="";
+    $("p_addr").value="";
+    $("p_zone").value="";
+    $("p_type").value="Sur place";
+    $("p_pay").value="";
+    $("deliveryWarn").style.display="none";
+    syncPlaceDeliveryUI();
+    renderPlaceCart();
+
+    loadMenuForPlace();
+    loadOrders();
+
+  }catch(e){
+    showErr(e.message || e);
+  }
+});
 
 $("placeOrderBtn").addEventListener("click", async ()=>{
   try{
@@ -1495,6 +1560,20 @@ async function closeDayPreview(){
 }
 
 function renderCloseDayPreview(pv){
+  const und = Number(pv.undeliveredCount || 0);
+
+  const undMsg = und > 0
+    ? `<div style="
+        margin-bottom:10px;
+        padding:10px 12px;
+        border-radius:12px;
+        border:1px solid rgba(255,193,7,.30);
+        background: rgba(255,193,7,.12);
+        font-weight:900
+      ">
+        ${und} commande${und>1?'s':''} ne ${und>1?'sont':'est'} pas livrée${und>1?'s':''}.
+      </div>`
+    : "";
   const t = pv.totals || {};
   const pay = (t.byPayment || {});
   const lines = [
