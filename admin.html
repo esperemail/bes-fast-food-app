@@ -1607,6 +1607,7 @@ $("placePendingBtn").addEventListener("click", async ()=>{
     const fee = getDeliveryFee();
     const sub = calcPlaceSubtotal();
     const total = sub + fee;
+
     const baseNote = $("p_note").value.trim();
     const deliveryNote = isLiv ? `Zone: ${zone} | Frais livraison: ${fmtHTG(fee)}` : "";
     const noteCommande = [baseNote, deliveryNote].filter(Boolean).join(" | ");
@@ -1618,41 +1619,27 @@ $("placePendingBtn").addEventListener("click", async ()=>{
       typeCommande,
       adresse: isLiv ? `${zone} — ${addr}` : "",
       noteCommande,
-      paymentMethod: $("p_pay").value.trim() || "", // peut être vide en attente
+      paymentMethod: $("p_pay").value.trim() || "",
       items,
       deliveryZone: isLiv ? zone : "",
       deliveryFee: isLiv ? fee : 0,
       totalOverride: total
     };
-    
-  // ✅ Si on est en train de modifier une commande en attente,
-  // on annule l’ancienne pour éviter les doublons
-  if(_editingPendingId){
-  await setStatus(_editingPendingId, "Annulée");
-}
+
+    // ✅ 1) Crée la nouvelle commande en attente (UNE SEULE FOIS)
     const r = await apiJsonp("admin_createPendingOrder", { k, payload: JSON.stringify(payload) });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_createPendingOrder");
 
-    const r = await apiJsonp("admin_createPendingOrder", { k, payload: JSON.stringify(payload) });
-if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_createPendingOrder");
+    // ✅ 2) Si on modifiait une ancienne commande, on annule l’ancienne APRÈS succès
+    if(_editingPendingId){
+      await setStatus(_editingPendingId, "Annulée");
+    }
+    _editingPendingId = null;
 
-// ✅ seulement si on était en mode "modifier"
-if(_editingPendingId){
-  await setStatus(_editingPendingId, "Annulée"); // annule l'ancienne
-}
-_editingPendingId = null; // on sort du mode édition
-
-toast("Commande mise en attente ✅ ID: " + (r.orderId || "OK"));
-loadPendingOrders();
-switchTab("pending");
-
-
+    // ✅ 3) UI refresh (UNE SEULE FOIS)
     toast("Commande mise en attente ✅ ID: " + (r.orderId || "OK"));
-    
-    _editingPendingId = null;  // ✅ reset mode édition
-    loadPendingOrders();       // ✅ refresh liste attente
-    switchTab("pending");      // ✅ revenir sur l’onglet attente (optionnel)
-
+    loadPendingOrders();
+    switchTab("pending");
 
     // reset panier / champs
     for(const k2 of Object.keys(placeCart)) delete placeCart[k2];
@@ -1662,6 +1649,7 @@ switchTab("pending");
     $("p_type").value="Sur place";
     $("p_pay").value="";
     $("deliveryWarn").style.display="none";
+
     syncPlaceDeliveryUI();
     renderPlaceCart();
 
@@ -1672,6 +1660,7 @@ switchTab("pending");
     showErr(e.message || e);
   }
 });
+
 
 $("placeOrderBtn").addEventListener("click", async ()=>{
   try{
