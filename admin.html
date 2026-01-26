@@ -801,8 +801,8 @@ function filterOrders(list){
   const hideDel = !!$("hideDelivered").checked;
 
   return (list||[]).filter(o=>{
+    if(norm(o.Statut).includes("en attente")) return false;
     if(hideDel && norm(o.Statut).includes("livr")) return false;
-
     if(q && !String(o.OrderID||"").includes(q)) return false;
     return true;
   });
