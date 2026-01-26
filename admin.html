@@ -491,17 +491,19 @@
       <div class="cardHead">
         <b>Clôture de la journée (Preview)</b>
         <div class="row">
-         <input id="cd_start" type="date" style="max-width:190px">
-          <input id="cd_end" type="date" style="max-width:190px">
-          <input id="cd_opening" type="number" step="0.01" placeholder="Encaisse début (HTG)" style="max-width:220px">
-          <button class="btn warn" id="cd_previewBtn" type="button">Fermer la journée (Preview)</button>
-          <button class="btn good" id="cd_validateBtn" type="button" disabled>Valider (Final + PDF)</button>
-          <button class="btn good" id="cd_validateBtn" type="button" disabled>Valider (Final + PDF)</button>
-        <span id="cd_blockMsg" style="display:none;font-weight:900;color:#ff6b6b;margin-left:10px">
-        Commande non livrée restée ouverte
-        </span>
+  <input id="cd_start" type="date" style="max-width:190px">
+  <input id="cd_end" type="date" style="max-width:190px">
+  <input id="cd_opening" type="number" step="0.01" placeholder="Encaisse début (HTG)" style="max-width:220px">
 
-        </div>
+  <button class="btn warn" id="cd_previewBtn" type="button">Fermer la journée (Preview)</button>
+
+  <button class="btn good" id="cd_validateBtn" type="button" disabled>Valider (Final + PDF)</button>
+
+  <span id="cd_blockMsg" style="display:none;font-weight:900;color:#ff6b6b;margin-left:10px">
+    Commande non livrée restée ouverte
+  </span>
+</div>
+
       </div>
       <div class="content">
         <div class="muted small">
@@ -578,8 +580,7 @@
         <button class="btn" id="hr_loadBtn" type="button">Charger</button>
         <input id="hr_start" type="date" style="max-width:190px">
       <input id="hr_end" type="date" style="max-width:190px">
-      <button class="btn" id="hr_loadBtn" type="button">Charger</button>
-      </div>
+     </div>
     </div>
     <div class="content" style="padding:0">
       <table>
@@ -888,7 +889,8 @@ function renderPendingTable(list){
               <div class="actions">
                 <button class="btn warn" type="button" onclick="editPending('${oid.replace(/'/g,"")}')">Modifier</button>
                 <button class="btn good" type="button" onclick="finalizePending('${oid.replace(/'/g,"")}')">Finaliser</button>
-                <button class="btn bad" type="button" onclick="setStatus('${oid.replace(/'/g,"")}', 'Annulée')">Annuler</button>
+               <button class="btn bad" type="button" onclick="cancelOrder('${oid.replace(/'/g,"")}')">Annuler</button>
+
               </div>
             </td>
           </tr>
@@ -981,7 +983,8 @@ function renderOrdersTable(ordersRaw){
 
             <button class="btn" type="button" onclick='printPOS80(${safeOrderJson})'>Imprimer 80mm</button>
 
-            <button class="btn bad" type="button" onclick="setStatus('${oid.replace(/'/g,"")}', 'Annulée')">Annuler</button>
+            <button class="btn bad" type="button" onclick="cancelOrder('${oid.replace(/'/g,"")}')">Annuler</button>
+
           </div>
         </td>
       </tr>
@@ -1788,23 +1791,34 @@ function initCloseDayUI(){
 
 async function closeDayPreview(){
   try{
-   const startDate = $("cd_start").value.trim() || todayISO();
-  const endDate = $("cd_end").value.trim() || startDate;
+    const k = $("adminKey").value.trim();                 // ✅ défini
+    const startDate = $("cd_start").value.trim() || todayISO();
+    const endDate   = $("cd_end").value.trim()   || startDate;
+    const openingCash = $("cd_opening").value;            // ✅ défini
 
-const r = await apiJsonp("admin_closeDayPreview", { k, startDate, endDate, openingCash: String(openingCash||0) });
+    const r = await apiJsonp("admin_closeDayPreview", {
+      k,
+      startDate,
+      endDate,
+      openingCash: String(openingCash || 0)
+    });
 
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_closeDayPreview");
 
     _cd_lastPreview = r;
     renderCloseDayPreview(r);
-   const und = Number(r.undeliveredCount || 0);
+
+    // ✅ blocage si non livrées
+    const und = Number(r.undeliveredCount || 0);
     $("cd_blockMsg").style.display = und > 0 ? "inline" : "none";
     $("cd_validateBtn").disabled = und > 0;
+
     toast("Preview généré ✅");
   }catch(e){
     showErr(e.message || e);
   }
 }
+
 
 function renderCloseDayPreview(pv){
   const und = Number(pv.undeliveredCount || 0);
@@ -1857,11 +1871,25 @@ function renderCloseDayPreview(pv){
 
 async function validateCloseDay(){
   try{
-    const k = $("adminKey").value.trim();
+    const k = $("adminKey").value.trim();                 // ✅ défini
     const startDate = $("cd_start").value.trim() || todayISO();
-const endDate = $("cd_end").value.trim() || startDate;
+    const endDate   = $("cd_end").value.trim()   || startDate;
+    const openingCash = $("cd_opening").value;            // ✅ défini
 
-const r = await apiJsonp("admin_validateCloseDay", { k, startDate, endDate, openingCash: String(openingCash||0) });
+    // ✅ sécurité : si preview indique non livrées => bloquer
+    const und = Number(_cd_lastPreview?.undeliveredCount || 0);
+    if(und > 0){
+      $("cd_blockMsg").style.display = "inline";
+      $("cd_validateBtn").disabled = true;
+      throw new Error("Impossible de valider : commande(s) non livrée(s).");
+    }
+
+    const r = await apiJsonp("admin_validateCloseDay", {
+      k,
+      startDate,
+      endDate,
+      openingCash: String(openingCash || 0)
+    });
 
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_validateCloseDay");
 
@@ -1873,7 +1901,6 @@ const r = await apiJsonp("admin_validateCloseDay", { k, startDate, endDate, open
       $("cd_pdfBox").innerHTML = `PDF prêt: <a href="${r.pdfUrl}" target="_blank"><b>Ouvrir / Imprimer</b></a>`;
     }
 
-    // Recharge commandes (elles ont été déplacées)
     loadOrders();
   }catch(e){
     showErr(e.message || e);
