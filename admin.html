@@ -695,7 +695,31 @@ function escapeHtml(s){
   return String(s||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 }
 function norm(s){ return String(s||"").toLowerCase().trim(); }
+  
+let _pendingFinalizeOrderId = null;
 
+function openPayModal(orderId, defaultPay=""){
+  _pendingFinalizeOrderId = orderId;
+  $("paySelect").value = defaultPay || "";
+  $("payModal").style.display = "flex";
+}
+
+function closePayModal(){
+  _pendingFinalizeOrderId = null;
+  $("payModal").style.display = "none";
+}
+
+async function confirmPayModal(){
+  const pay = $("paySelect").value;
+  if(!pay){
+    showErr("Choisis une méthode de paiement.");
+    return;
+  }
+  closePayModal();
+  await finalizePendingWithPay(_pendingFinalizeOrderId, pay);
+}
+
+  
 /***************
  * Admin key auto
  ***************/
@@ -1054,34 +1078,27 @@ function askPaymentMethod(defaultVal=""){
   return found || m; // accepte texte exact si tu préfères
 }
 
-window.finalizePending = async function(orderId){
+window.finalizePending = function(orderId){
+  const o = lastPendingCache.find(x=>String(x.OrderID)===String(orderId));
+  const existingPay = o?.PaymentMethod || "";
+  openPayModal(orderId, existingPay);
+};
+
+async function finalizePendingWithPay(orderId, pay){
   try{
-    // retrouver commande pour préremplir défaut paiement
-    const o = lastPendingCache.find(x=>String(x.OrderID||"").trim()===String(orderId).trim());
-    const existingPay = o?.PaymentMethod || o?.paymentMethod || "";
-
-    const pay = askPaymentMethod(existingPay);
-    if(!pay){
-      toast("Finalisation annulée (paiement requis).");
-      return;
-    }
-
-    // ✅ Idéal: appeler un endpoint qui enregistre le paiement + change statut
-    // 👉 On tente d’abord un endpoint s’il existe côté Apps Script :
     const k = $("adminKey").value.trim();
     let ok = false;
 
     try{
-      const r = await apiJsonp("admin_finalizePendingOrder", { k, orderId, paymentMethod: pay });
+      const r = await apiJsonp("admin_finalizePendingOrder", {
+        k, orderId, paymentMethod: pay
+      });
       if(r && r.ok) ok = true;
-    }catch(_e){
-      // endpoint pas là -> fallback
-    }
+    }catch(_e){}
 
     if(!ok){
-      // fallback minimal: juste changer statut (mais le paiement ne sera pas enregistré côté serveur)
       await setStatus(orderId, "Reçue");
-      toast("Finalisé ✅ (paiement demandé, mais pas enregistré côté serveur)");
+      toast("Finalisé ✅ (paiement non stocké côté serveur)");
     }else{
       toast("Finalisé ✅");
     }
@@ -1895,9 +1912,37 @@ async function loadReportsHistory(){
   }
 }
 $("hr_loadBtn").addEventListener("click", loadReportsHistory);
-
-  
+ 
 </script>
+  
+  <!-- ✅ Modal choix paiement (Finaliser) -->
+<div id="payModal" style="
+  position:fixed; inset:0; display:none; z-index:9999;
+  background:rgba(0,0,0,.6); backdrop-filter: blur(6px);
+  align-items:center; justify-content:center;
+">
+  <div style="
+    width:360px; max-width:90%;
+    background:#0b1220; border:1px solid rgba(255,255,255,.15);
+    border-radius:16px; padding:18px; box-shadow:0 12px 32px rgba(0,0,0,.4)
+  ">
+    <h3 style="margin-top:0">Méthode de paiement</h3>
+
+    <select id="paySelect" style="width:100%;margin:10px 0">
+      <option value="">— Choisir —</option>
+      <option value="Cash">Cash</option>
+      <option value="Moncash">Moncash</option>
+      <option value="Natcash">Natcash</option>
+      <option value="Crédit">Crédit</option>
+    </select>
+
+    <div class="row" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn" onclick="closePayModal()">Annuler</button>
+      <button class="btn good" onclick="confirmPayModal()">Valider</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
 
