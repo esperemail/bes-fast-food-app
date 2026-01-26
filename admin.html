@@ -755,6 +755,7 @@ document.querySelectorAll(".tab").forEach(btn=>{
 $("refreshBtn").addEventListener("click", ()=>{
   const active = document.querySelector(".tab.active")?.dataset?.tab || "orders";
   if(active==="orders") loadOrders();
+  if(active==="pending") loadPendingOrders();
   if(active==="products") { loadCategories(); loadProducts(); }
   if(active==="place") loadMenuForPlace();
   if(active==="closeDay") initCloseDayUI();
@@ -806,6 +807,55 @@ function filterOrders(list){
     return true;
   });
 }
+/***********************
+ * 🔶 PENDING ORDERS (En attente)
+ ***********************/
+async function loadPendingOrders(){
+  try{
+    const k = $("adminKey").value.trim();
+
+    // Option 1 (OK): via admin_listOrders + status="En attente"
+    const r = await apiJsonp("admin_listOrders", { k, limit:"200", status:"En attente" });
+
+    // Option 2 (mieux): si tu veux utiliser ton endpoint dédié:
+    // const r = await apiJsonp("admin_listPendingOrders", { k, limit:"200" });
+
+    if(!r || !r.ok) throw new Error(r?.error || "Erreur chargement En attente");
+
+    const list = Array.isArray(r.orders) ? r.orders : [];
+    renderPendingTable(list);
+
+  }catch(e){
+    showErr(e.message || e);
+    $("pendingTbody").innerHTML = `<tr><td colspan="5" class="muted">Erreur.</td></tr>`;
+  }
+}
+
+function renderPendingTable(list){
+  $("pendingTbody").innerHTML = list.length
+    ? list.map(o=>{
+        const oid = String(o.OrderID||"").trim();
+        return `
+          <tr>
+            <td>${escapeHtml(o.DateHeure||"")}</td>
+            <td class="idCell" title="${escapeHtml(oid)}">${escapeHtml(oid)}</td>
+            <td>
+              <b>${escapeHtml(o.ClientNom||"")}</b>
+              <div class="muted">${escapeHtml(o.Telephone||"")}</div>
+            </td>
+            <td><b>${fmtHTG(o.Total||0)}</b></td>
+            <td>
+              <div class="actions">
+                <button class="btn warn" type="button" onclick="editPending('${oid.replace(/'/g,"")}')">Modifier</button>
+                <button class="btn good" type="button" onclick="finalizePending('${oid.replace(/'/g,"")}')">Finaliser</button>
+                <button class="btn bad" type="button" onclick="setStatus('${oid.replace(/'/g,"")}', 'Annulée')">Annuler</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("")
+    : `<tr><td colspan="5" class="muted">Aucune en attente.</td></tr>`;
+}
 
 async function loadOrders(){
   try{
@@ -837,64 +887,7 @@ function renderOrdersTable(ordersRaw){
     prevOrderIds = new Set();
     return;
   }
-/* ================================
- * 🔶 PENDING ORDERS (En attente)
- * ================================ */
 
-async function loadPendingOrders(){
-  try{
-    const k = $("adminKey").value.trim();
-    const r = await apiJsonp("admin_listOrders", {
-      k,
-      limit: "200",
-      status: "En attente"
-    });
-    if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listOrders");
-
-    const list = Array.isArray(r.orders) ? r.orders : [];
-    renderPendingTable(list);
-
-  }catch(e){
-    showErr(e.message || e);
-    $("pendingTbody").innerHTML =
-      `<tr><td colspan="5" class="muted">Erreur.</td></tr>`;
-  }
-}
-
-function renderPendingTable(list){
-  $("pendingTbody").innerHTML = list.length
-    ? list.map(o=>{
-        const oid = String(o.OrderID||"").trim();
-        return `
-          <tr>
-            <td>${escapeHtml(o.DateHeure||"")}</td>
-            <td class="idCell" title="${escapeHtml(oid)}">${escapeHtml(oid)}</td>
-            <td>
-              <b>${escapeHtml(o.ClientNom||"")}</b>
-              <div class="muted">${escapeHtml(o.Telephone||"")}</div>
-            </td>
-            <td><b>${fmtHTG(o.Total||0)}</b></td>
-            <td>
-              <div class="actions">
-                <button class="btn warn" type="button"
-                  onclick="editPending('${oid.replace(/'/g,"")}')">
-                  Modifier
-                </button>
-                <button class="btn good" type="button"
-                  onclick="finalizePending('${oid.replace(/'/g,"")}')">
-                  Finaliser
-                </button>
-                <button class="btn bad" type="button"
-                  onclick="setStatus('${oid.replace(/'/g,"")}', 'Annulée')">
-                  Annuler
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("")
-    : `<tr><td colspan="5" class="muted">Aucune en attente.</td></tr>`;
-}
   const currentIds = new Set(orders.map(o=>String(o.OrderID||"").trim()).filter(Boolean));
 
   tb.innerHTML = orders.map(o=>{
@@ -1219,6 +1212,7 @@ window.pickProduct = function(productId){
 
 $("reloadProductsBtn").addEventListener("click", loadProducts);
 $("reloadCatsBtn").addEventListener("click", loadCategories);
+$("pendingReloadBtn").addEventListener("click", loadPendingOrders);
 
 $("clearFormBtn").addEventListener("click", ()=>{
   ["pf_id","pf_name","pf_catNew","pf_price","pf_stock","pf_order"].forEach(id=>$(id).value="");
