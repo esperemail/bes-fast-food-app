@@ -198,18 +198,16 @@
         <button class="tab" data-tab="pending">En attente</button>
         <button class="tab" data-tab="products">Produits</button>
         <button class="tab" data-tab="place">Placer une commande</button>
-         <button class="tab" data-tab="closeDay">Clôture journée</button>
-          <button class="tab" data-tab="histTx">Historique transactions</button>
-          <button class="tab" data-tab="histRep">Historique rapports</button>
+        <button class="tab" data-tab="closeDay">Clôture journée</button>
+        <button class="tab" data-tab="histTx">Historique transactions</button>
+        <button class="tab" data-tab="histRep">Historique rapports</button>
       </div>
 
       <div class="row" style="flex:1;justify-content:flex-end">
         <input id="adminKey" placeholder="ADMIN KEY (auto)" style="max-width:340px" />
 
-        <!-- ✅ Recherche ID commande -->
         <input id="orderIdSearch" placeholder="Recherche ID commande…" style="max-width:260px" />
 
-        <!-- ✅ Masquer livrés -->
         <label class="pill" style="display:flex;align-items:center;gap:8px;cursor:pointer">
           <input id="hideDelivered" type="checkbox" style="width:18px;height:18px;accent-color:#FFC107;margin:0">
           Masquer livrés
@@ -260,28 +258,28 @@
           Les commandes <b>Livré</b> descendent automatiquement en bas (ou masquées si filtre activé).
         </div>
       </section>
-      
-    <!-- Pending -->   
-<section id="tab-pending" style="display:none">
-  <div class="card">
-    <div class="cardHead">
-      <b>Commandes en attente</b>
-      <button class="btn" type="button" id="pendingReloadBtn">Recharger</button>
-    </div>
-    <div class="content" style="padding:0">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th><th>ID</th><th>Client</th><th>Total</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="pendingTbody">
-          <tr><td colspan="5" class="muted">Chargement…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+
+      <!-- Pending -->
+      <section id="tab-pending" style="display:none">
+        <div class="card">
+          <div class="cardHead">
+            <b>Commandes en attente</b>
+            <button class="btn" type="button" id="pendingReloadBtn">Recharger</button>
+          </div>
+          <div class="content" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>ID</th><th>Client</th><th>Total</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pendingTbody">
+                <tr><td colspan="5" class="muted">Chargement…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       <!-- PRODUCTS -->
       <section id="tab-products" style="display:none">
@@ -475,132 +473,133 @@
               </div>
 
               <div style="margin-top:12px">
-<div class="row" style="gap:10px">
-  <button class="btn warn" type="button" id="placePendingBtn">Unregister / En attente</button>
-  <button class="btn good" type="button" id="placeOrderBtn" disabled>Enregistrer (Sheets)</button>
-</div>              </div>
+                <div class="row" style="gap:10px">
+                  <button class="btn warn" type="button" id="placePendingBtn">Unregister / En attente</button>
+                  <button class="btn good" type="button" id="placeOrderBtn" disabled>Enregistrer (Sheets)</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      
-<!-- ✅ CLOSE DAY -->
-<section id="tab-closeDay" style="display:none">
-  <div class="grid">
-    <div class="card">
-      <div class="cardHead">
-        <b>Clôture de la journée (Preview)</b>
-        <div class="row">
-  <input id="cd_start" type="date" style="max-width:190px">
-  <input id="cd_end" type="date" style="max-width:190px">
-  <input id="cd_opening" type="number" step="0.01" placeholder="Encaisse début (HTG)" style="max-width:220px">
 
-  <button class="btn warn" id="cd_previewBtn" type="button">Fermer la journée (Preview)</button>
+      <!-- ✅ CLOSE DAY -->
+      <section id="tab-closeDay" style="display:none">
+        <div class="grid">
+          <div class="card">
+            <div class="cardHead">
+              <b>Clôture de la journée (Preview)</b>
+              <div class="row">
+                <input id="cd_start" type="date" style="max-width:190px">
+                <input id="cd_end" type="date" style="max-width:190px">
+                <input id="cd_opening" type="number" step="0.01" placeholder="Encaisse début (HTG)" style="max-width:220px">
 
-  <button class="btn good" id="cd_validateBtn" type="button" disabled>Valider (Final + PDF)</button>
+                <button class="btn warn" id="cd_previewBtn" type="button">Fermer la journée (Preview)</button>
+                <button class="btn good" id="cd_validateBtn" type="button" disabled>Valider (Final + PDF)</button>
 
-  <span id="cd_blockMsg" style="display:none;font-weight:900;color:#ff6b6b;margin-left:10px">
-    Commande non livrée restée ouverte
-  </span>
-</div>
+                <span id="cd_blockMsg" style="display:none;font-weight:900;color:#ff6b6b;margin-left:10px">
+                  Commande non livrée restée ouverte
+                </span>
+              </div>
+            </div>
 
-      </div>
-      <div class="content">
-        <div class="muted small">
-          Les commandes <b>Annulée</b> ne sont pas comptées comme ventes.
+            <div class="content">
+              <div class="muted small">
+                Les commandes <b>Annulée</b> et <b>En attente</b> ne sont pas comptées comme ventes.
+                La validation est <b>bloquée</b> si une commande dans la période n’est pas <b>Livré</b>.
+              </div>
+              <div class="hr"></div>
+
+              <div id="cd_summary" class="muted">Aucun preview.</div>
+
+              <div class="hr"></div>
+
+              <b>Ventes par produit</b>
+              <div class="content" style="padding:0">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Produit</th>
+                      <th>Qté</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cd_prodTbody">
+                    <tr><td colspan="3" class="muted">—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="hr"></div>
+
+              <div id="cd_pdfBox" class="muted small" style="display:none"></div>
+            </div>
+          </div>
         </div>
-        <div class="hr"></div>
+      </section>
 
-        <div id="cd_summary" class="muted">Aucun preview.</div>
-
-        <div class="hr"></div>
-
-        <b>Ventes par produit</b>
-        <div class="content" style="padding:0">
-          <table>
-            <thead>
-              <tr>
-                <th>Produit</th>
-                <th>Qté</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody id="cd_prodTbody">
-              <tr><td colspan="3" class="muted">—</td></tr>
-            </tbody>
-          </table>
+      <!-- ✅ HISTORIQUE TRANSACTIONS -->
+      <section id="tab-histTx" style="display:none">
+        <div class="card">
+          <div class="cardHead">
+            <b>Historique des transactions</b>
+            <div class="row">
+              <input id="ht_start" type="date" style="max-width:190px">
+              <input id="ht_end" type="date" style="max-width:190px">
+              <input id="ht_q" placeholder="Recherche: ID / Tel / Nom..." style="max-width:260px">
+              <button class="btn" id="ht_loadBtn" type="button">Rechercher</button>
+            </div>
+          </div>
+          <div class="content" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>ID</th>
+                  <th>Client</th>
+                  <th>Paiement</th>
+                  <th>Total</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="ht_tbody">
+                <tr><td colspan="6" class="muted">Aucun résultat.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+      </section>
 
-        <div class="hr"></div>
-
-        <div id="cd_pdfBox" class="muted small" style="display:none"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ✅ HISTORIQUE TRANSACTIONS -->
-<section id="tab-histTx" style="display:none">
-  <div class="card">
-    <div class="cardHead">
-      <b>Historique des transactions</b>
-      <div class="row">
-        <input id="ht_start" type="date" style="max-width:190px">
-        <input id="ht_end" type="date" style="max-width:190px">
-        <input id="ht_q" placeholder="Recherche: ID / Tel / Nom..." style="max-width:260px">
-        <button class="btn" id="ht_loadBtn" type="button">Rechercher</button>
-      </div>
-    </div>
-    <div class="content" style="padding:0">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>ID</th>
-            <th>Client</th>
-            <th>Paiement</th>
-            <th>Total</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody id="ht_tbody">
-          <tr><td colspan="6" class="muted">Aucun résultat.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ✅ HISTORIQUE RAPPORTS -->
-<section id="tab-histRep" style="display:none">
-  <div class="card">
-    <div class="cardHead">
-      <b>Historique des rapports (PDF)</b>
-      <div class="row">
-        <button class="btn" id="hr_loadBtn" type="button">Charger</button>
-        <input id="hr_start" type="date" style="max-width:190px">
-      <input id="hr_end" type="date" style="max-width:190px">
-     </div>
-    </div>
-    <div class="content" style="padding:0">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Créé</th>
-            <th>Encaisse début</th>
-            <th>Encaisse comptable</th>
-            <th>Total</th>
-            <th>PDF</th>
-          </tr>
-        </thead>
-        <tbody id="hr_tbody">
-          <tr><td colspan="6" class="muted">Aucun rapport.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>      
+      <!-- ✅ HISTORIQUE RAPPORTS -->
+      <section id="tab-histRep" style="display:none">
+        <div class="card">
+          <div class="cardHead">
+            <b>Historique des rapports (PDF)</b>
+            <div class="row">
+              <button class="btn" id="hr_loadBtn" type="button">Charger</button>
+              <input id="hr_start" type="date" style="max-width:190px">
+              <input id="hr_end" type="date" style="max-width:190px">
+            </div>
+          </div>
+          <div class="content" style="padding:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Créé</th>
+                  <th>Encaisse début</th>
+                  <th>Encaisse comptable</th>
+                  <th>Total</th>
+                  <th>PDF</th>
+                </tr>
+              </thead>
+              <tbody id="hr_tbody">
+                <tr><td colspan="6" class="muted">Aucun rapport.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
     </div>
   </div>
@@ -627,11 +626,63 @@ const DELIVERY_FEES = {
   "Centre ville - Limonade": 500,
 };
 
-function getDeliveryFee(){
-  const isLiv = norm($("p_type").value)==="livraison";
-  if(!isLiv) return 0;
-  const z = $("p_zone").value.trim();
-  return Number(DELIVERY_FEES[z] || 0);
+/***************
+ * UI helpers
+ ***************/
+const $ = (id)=>document.getElementById(id);
+
+function toast(msg){
+  $("toast").style.display="block";
+  $("toast").textContent=String(msg||"");
+  setTimeout(()=>{$("toast").style.display="none";}, 3500);
+}
+function showErr(msg){
+  $("err").style.display="block";
+  $("err").textContent=String(msg||"Erreur");
+  setTimeout(()=>{$("err").style.display="none";}, 6500);
+}
+function fmtHTG(n){
+  const x = Number(n||0);
+  return x.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2}) + " HTG";
+}
+function escapeHtml(s){
+  return String(s||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+function norm(s){
+  let x = String(s||"").trim().toLowerCase();
+  try{ x = x.normalize("NFD").replace(/[\u0300-\u036f]/g,""); }catch(_e){}
+  return x;
+}
+
+/***************
+ * Helpers dates
+ ***************/
+function todayISO(){
+  const d = new Date();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+function parseOrderDateMs(o){
+  const raw = String(o?.DateHeure || o?.Date || o?.createdAt || o?.CreatedAt || "").trim();
+  if(!raw) return NaN;
+
+  // ISO / "2026-01-30T05:48:02.039Z"
+  let t = Date.parse(raw);
+  if(!Number.isNaN(t)) return t;
+
+  // "2026-01-30 05:48:02"
+  t = Date.parse(raw.replace(" ", "T"));
+  if(!Number.isNaN(t)) return t;
+
+  // fallback date only
+  const d = raw.slice(0,10);
+  return Date.parse(d + "T00:00:00");
+}
+function inDateRangeMs(t, startDate, endDate){
+  const s = Date.parse(startDate + "T00:00:00");
+  const e = Date.parse(endDate   + "T23:59:59.999");
+  return !Number.isNaN(t) && t >= s && t <= e;
 }
 
 /***************
@@ -684,89 +735,6 @@ function apiJsonp(action, params = {}) {
 }
 
 /***************
- * UI helpers
- ***************/
-const $ = (id)=>document.getElementById(id);
-
-function toast(msg){
-  $("toast").style.display="block";
-  $("toast").textContent=String(msg||"");
-  setTimeout(()=>{$("toast").style.display="none";}, 3500);
-}
-function showErr(msg){
-  $("err").style.display="block";
-  $("err").textContent=String(msg||"Erreur");
-  setTimeout(()=>{$("err").style.display="none";}, 6500);
-}
-function fmtHTG(n){
-  const x = Number(n||0);
-  return x.toLocaleString("en-US",{minimumFractionDigits:2, maximumFractionDigits:2}) + " HTG";
-}
-function escapeHtml(s){
-  return String(s||"").replace(/[&<>"']/g, (m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
-}
-function norm(s){ return String(s||"").toLowerCase().trim(); }
-/***********************
- * Helpers dates + status (CloseDay)
- ***********************/
-function parseOrderDateMs(o){
-  const raw = String(o?.DateHeure || o?.Date || "").trim();
-  if(!raw) return NaN;
-
-  // ISO / "2026-01-30T05:48:02.039Z"
-  let t = Date.parse(raw);
-  if(!Number.isNaN(t)) return t;
-
-  // "2026-01-30 05:48:02"
-  t = Date.parse(raw.replace(" ", "T"));
-  if(!Number.isNaN(t)) return t;
-
-  // fallback date only
-  const d = raw.slice(0,10);
-  return Date.parse(d + "T00:00:00");
-}
-
-function inDateRangeMs(t, startDate, endDate){
-  const s = Date.parse(startDate + "T00:00:00");
-  const e = Date.parse(endDate   + "T23:59:59.999");
-  return !Number.isNaN(t) && t >= s && t <= e;
-}
-
-function normStatus2(s){
-  s = String(s||"").trim().toLowerCase();
-  try{ s = s.normalize("NFD").replace(/[\u0300-\u036f]/g,""); }catch(_e){}
-  return s;
-}
-
-  
-let _pendingFinalizeOrderId = null;
-
-function openPayModal(orderId, defaultPay=""){
-  _pendingFinalizeOrderId = orderId;
-  $("paySelect").value = defaultPay || "";
-  $("payModal").style.display = "flex";
-}
-
-function closePayModal(){
-  _pendingFinalizeOrderId = null;
-  $("payModal").style.display = "none";
-}
-
-async function confirmPayModal(){
-  const pay = $("paySelect").value;
-  if(!pay){
-    showErr("Choisis une méthode de paiement.");
-    return;
-  }
-
-  const oid = _pendingFinalizeOrderId;   // ✅ garde l’ID
-  closePayModal();                      // ✅ maintenant on peut fermer
-  await finalizePendingWithPay(oid, pay);
-}
-
-
-  
-/***************
  * Admin key auto
  ***************/
 function getAdminKey(){
@@ -798,24 +766,31 @@ function openWhatsAppToClient(phone, message){
 /***************
  * Tabs
  ***************/
+function switchTab(tab){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add("active");
+
+  $("tab-orders").style.display   = (tab==="orders") ? "block" : "none";
+  $("tab-pending").style.display  = (tab==="pending") ? "block" : "none";
+  $("tab-products").style.display = (tab==="products") ? "block" : "none";
+  $("tab-place").style.display    = (tab==="place") ? "block" : "none";
+  $("tab-closeDay").style.display = (tab==="closeDay") ? "block" : "none";
+  $("tab-histTx").style.display   = (tab==="histTx") ? "block" : "none";
+  $("tab-histRep").style.display  = (tab==="histRep") ? "block" : "none";
+}
+
 document.querySelectorAll(".tab").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     const tab = btn.dataset.tab;
 
-    $("tab-orders").style.display   = (tab==="orders") ? "block" : "none";
-    $("tab-pending").style.display = (tab==="pending") ? "block" : "none";
-    $("tab-products").style.display = (tab==="products") ? "block" : "none";
-    $("tab-place").style.display    = (tab==="place") ? "block" : "none";
-    $("tab-closeDay").style.display  = (tab==="closeDay") ? "block" : "none";
-    $("tab-histTx").style.display    = (tab==="histTx") ? "block" : "none";
-    $("tab-histRep").style.display   = (tab==="histRep") ? "block" : "none";
+    switchTab(tab);
 
     if(tab==="orders") loadOrders();
     if(tab==="pending") loadPendingOrders();
     if(tab==="products") { loadCategories(); loadProducts(); }
-    if(tab==="place") loadMenuForPlace();    
+    if(tab==="place") loadMenuForPlace();
     if(tab==="closeDay") initCloseDayUI();
     if(tab==="histTx") loadTxHistory();
     if(tab==="histRep") loadReportsHistory();
@@ -832,9 +807,8 @@ $("refreshBtn").addEventListener("click", ()=>{
   if(active==="histTx") loadTxHistory();
   if(active==="histRep") loadReportsHistory();
 });
-$("statusFilter").addEventListener("change", loadOrders);
 
-/* ✅ Recherche ID + Masquer livrés (filtre local instant) */
+$("statusFilter").addEventListener("change", loadOrders);
 $("orderIdSearch").addEventListener("input", ()=> renderOrdersTable(lastOrdersCache));
 $("hideDelivered").addEventListener("change", ()=> renderOrdersTable(lastOrdersCache));
 
@@ -845,13 +819,12 @@ let prevOrderIds = new Set();
 let lastOrdersCache = [];
 let lastPendingCache = [];
 let _editingPendingId = null;
- 
 
 function rowClassForStatus(status){
   const st = norm(status);
   if(st.includes("annul")) return "is-cancel";
-  if(st.includes("prêt") || st.includes("pret")) return "is-working";
-  if(st.includes("reç") || st.includes("recu") || st.includes("reçue")) return "is-received";
+  if(st.includes("pret") || st.includes("prêt")) return "is-working";
+  if(st.includes("recu") || st.includes("reç")) return "is-received";
   return "";
 }
 
@@ -859,91 +832,38 @@ function rowClassForStatus(status){
 function sortOrdersForDisplay(list){
   const clone = [...(list||[])];
   clone.sort((a,b)=>{
-const aDelivered = norm(a.Statut).includes("livr");
-const bDelivered = norm(b.Statut).includes("livr");
-
-    if(aDelivered !== bDelivered) return aDelivered ? 1 : -1; // livré => bas
+    const aDelivered = norm(a.Statut).includes("livr");
+    const bDelivered = norm(b.Statut).includes("livr");
+    if(aDelivered !== bDelivered) return aDelivered ? 1 : -1;
     return String(b.DateHeure||"").localeCompare(String(a.DateHeure||""));
   });
   return clone;
 }
 
-/* ✅ filtre : recherche ID + masquer livrés */
+/* ✅ filtre : recherche ID + masquer livrés + cache Annulée/En attente */
 function filterOrders(list){
   const q = String($("orderIdSearch").value||"").trim();
   const hideDel = !!$("hideDelivered").checked;
 
   return (list||[]).filter(o=>{
     const st = norm(o.Statut||"");
-
-    if(st.includes("en attente")) return false;
-    if(st.includes("annul")) return false;          // ✅ cache les annulées
+    if(st.includes("en attente") || st.includes("attente")) return false;
+    if(st.includes("annul")) return false;
     if(hideDel && st.includes("livr")) return false;
     if(q && !String(o.OrderID||"").includes(q)) return false;
-
     return true;
   });
-}
-
-/***********************
- * 🔶 PENDING ORDERS (En attente)
- ***********************/
-async function loadPendingOrders(){
-  try{
-    const k = $("adminKey").value.trim();
-    const r = await apiJsonp("admin_listOrders", { k, limit:"200", status:"En attente" });
-    if(!r || !r.ok) throw new Error(r?.error || "Erreur chargement En attente");
-
-    const list = Array.isArray(r.orders) ? r.orders : [];
-    lastPendingCache = list;
-    renderPendingTable(list);
-
-  }catch(e){
-    showErr(e.message || e);
-    $("pendingTbody").innerHTML = `<tr><td colspan="5" class="muted">Erreur.</td></tr>`;
-  }
-}
-
-function renderPendingTable(list){
-  $("pendingTbody").innerHTML = list.length
-    ? list.map(o=>{
-        const oid = String(o.OrderID||"").trim();
-        return `
-          <tr>
-            <td>${escapeHtml(o.DateHeure||"")}</td>
-            <td class="idCell" title="${escapeHtml(oid)}">${escapeHtml(oid)}</td>
-            <td>
-              <b>${escapeHtml(o.ClientNom||"")}</b>
-              <div class="muted">${escapeHtml(o.Telephone||"")}</div>
-            </td>
-            <td><b>${fmtHTG(o.Total||0)}</b></td>
-            <td>
-              <div class="actions">
-                <button class="btn warn" type="button" onclick="editPending('${oid.replace(/'/g,"")}')">Modifier</button>
-                <button class="btn good" type="button" onclick="finalizePending('${oid.replace(/'/g,"")}')">Finaliser</button>
-               <button class="btn bad" type="button" onclick="cancelOrder('${oid.replace(/'/g,"")}')">Annuler</button>
-
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("")
-    : `<tr><td colspan="5" class="muted">Aucune en attente.</td></tr>`;
 }
 
 async function loadOrders(){
   try{
     const k = $("adminKey").value.trim();
     const status = $("statusFilter").value.trim();
-
     const r = await apiJsonp("admin_listOrders", { k, limit:"200", status });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listOrders");
-
     const orders = Array.isArray(r.orders) ? r.orders : [];
     lastOrdersCache = orders;
-
     renderOrdersTable(orders);
-
   }catch(e){
     showErr(e.message || e);
     $("ordersTbody").innerHTML = `<tr><td colspan="9" class="muted">Erreur de chargement.</td></tr>`;
@@ -952,7 +872,6 @@ async function loadOrders(){
 
 function renderOrdersTable(ordersRaw){
   const tb = $("ordersTbody");
-
   let orders = filterOrders(ordersRaw);
   orders = sortOrdersForDisplay(orders);
 
@@ -981,8 +900,7 @@ function renderOrdersTable(ordersRaw){
 
     const isNew = (!prevOrderIds.has(oid)) && (/reç|recu/i.test(st));
     const trClass = (isNew ? "is-new " : "") + rowClassForStatus(st);
-
-   const deliveredChecked = norm(st).includes("livr");
+    const deliveredChecked = norm(st).includes("livr");
 
     return `
       <tr class="${trClass}">
@@ -1001,22 +919,12 @@ function renderOrdersTable(ordersRaw){
         </td>
         <td>
           <div class="actions">
-            ${isSurPlace ? `
-              <button class="btn good" type="button" onclick='readyConsume(${safeOrderJson})'>Prêt à consommer</button>
-            ` : ``}
-
-            ${isEmporter ? `
-              <button class="btn good" type="button" onclick='readyTakeaway(${safeOrderJson})'>Prêt à emporter</button>
-            ` : ``}
-
-            ${/livraison/i.test(type) ? `
-              <button class="btn good" type="button" onclick='readyDeliver(${safeOrderJson})'>Prêt à livrer</button>
-            ` : ``}
+            ${isSurPlace ? `<button class="btn good" type="button" onclick='readyConsume(${safeOrderJson})'>Prêt à consommer</button>` : ``}
+            ${isEmporter ? `<button class="btn good" type="button" onclick='readyTakeaway(${safeOrderJson})'>Prêt à emporter</button>` : ``}
+            ${/livraison/i.test(type) ? `<button class="btn good" type="button" onclick='readyDeliver(${safeOrderJson})'>Prêt à livrer</button>` : ``}
 
             <button class="btn" type="button" onclick='printPOS80(${safeOrderJson})'>Imprimer 80mm</button>
-
             <button class="btn bad" type="button" onclick="cancelOrder('${oid.replace(/'/g,"")}')">Annuler</button>
-
           </div>
         </td>
       </tr>
@@ -1032,58 +940,106 @@ window.toggleDelivered = async function(orderId, isDelivered){
     const nextStatus = isDelivered ? "Livré" : "Reçue";
     await setStatus(orderId, nextStatus);
     toast(isDelivered ? "Marqué livré ✅" : "Remis en Reçue ✅");
-    loadOrders(); // re-tri + re-filtre
+    loadOrders();
   }catch(e){
     showErr(e.message || e);
   }
 };
 
 window.setStatus = async function(orderId, status){
-  try{
-    const k = $("adminKey").value.trim();
-    const r = await apiJsonp("admin_setOrderStatus", { k, orderId, status });
-    if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_setOrderStatus");
-  }catch(e){
-    showErr(e.message || e);
-    throw e;
-  }
+  const k = $("adminKey").value.trim();
+  const r = await apiJsonp("admin_setOrderStatus", { k, orderId, status });
+  if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_setOrderStatus");
 };
- // ✅ Annuler une commande (fonction manquante)
+
 window.cancelOrder = async function(orderId){
   try{
     const oid = String(orderId || "").trim();
     if(!oid) throw new Error("OrderID manquant");
-
     if(!confirm("Annuler cette commande ?")) return;
 
     await setStatus(oid, "Annulée");
     toast("Commande annulée ✅");
-
-    // refresh tables
     loadOrders();
     loadPendingOrders();
   }catch(e){
     showErr(e.message || e);
   }
 };
- 
-function switchTab(tab){
-  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add("active");
 
-  $("tab-orders").style.display   = (tab==="orders") ? "block" : "none";
-  $("tab-pending").style.display  = (tab==="pending") ? "block" : "none";
-  $("tab-products").style.display = (tab==="products") ? "block" : "none";
-  $("tab-place").style.display    = (tab==="place") ? "block" : "none";
-  $("tab-closeDay").style.display = (tab==="closeDay") ? "block" : "none";
-  $("tab-histTx").style.display   = (tab==="histTx") ? "block" : "none";
-  $("tab-histRep").style.display  = (tab==="histRep") ? "block" : "none";
+/***********************
+ * 🔶 PENDING ORDERS (En attente)
+ ***********************/
+async function loadPendingOrders(){
+  try{
+    const k = $("adminKey").value.trim();
+    const r = await apiJsonp("admin_listOrders", { k, limit:"200", status:"En attente" });
+    if(!r || !r.ok) throw new Error(r?.error || "Erreur chargement En attente");
+    const list = Array.isArray(r.orders) ? r.orders : [];
+    lastPendingCache = list;
+    renderPendingTable(list);
+  }catch(e){
+    showErr(e.message || e);
+    $("pendingTbody").innerHTML = `<tr><td colspan="5" class="muted">Erreur.</td></tr>`;
+  }
+}
+
+function renderPendingTable(list){
+  $("pendingTbody").innerHTML = list.length
+    ? list.map(o=>{
+        const oid = String(o.OrderID||"").trim();
+        return `
+          <tr>
+            <td>${escapeHtml(o.DateHeure||"")}</td>
+            <td class="idCell" title="${escapeHtml(oid)}">${escapeHtml(oid)}</td>
+            <td>
+              <b>${escapeHtml(o.ClientNom||"")}</b>
+              <div class="muted">${escapeHtml(o.Telephone||"")}</div>
+            </td>
+            <td><b>${fmtHTG(o.Total||0)}</b></td>
+            <td>
+              <div class="actions">
+                <button class="btn warn" type="button" onclick="editPending('${oid.replace(/'/g,"")}')">Modifier</button>
+                <button class="btn good" type="button" onclick="finalizePending('${oid.replace(/'/g,"")}')">Finaliser</button>
+                <button class="btn bad" type="button" onclick="cancelOrder('${oid.replace(/'/g,"")}')">Annuler</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("")
+    : `<tr><td colspan="5" class="muted">Aucune en attente.</td></tr>`;
+}
+
+/***********************
+ * Modal paiement (Finaliser pending)
+ ***********************/
+let _pendingFinalizeOrderId = null;
+
+function openPayModal(orderId, defaultPay=""){
+  _pendingFinalizeOrderId = orderId;
+  $("paySelect").value = defaultPay || "";
+  $("payModal").style.display = "flex";
+}
+function closePayModal(){
+  _pendingFinalizeOrderId = null;
+  $("payModal").style.display = "none";
+}
+async function confirmPayModal(){
+  const pay = $("paySelect").value;
+  if(!pay){
+    showErr("Choisis une méthode de paiement.");
+    return;
+  }
+  const oid = _pendingFinalizeOrderId;
+  closePayModal();
+  await finalizePendingWithPay(oid, pay);
 }
 
 window.editPending = async function(orderId){
   try{
     _editingPendingId = String(orderId || "").trim();
-    // ✅ RESET avant de charger une autre commande
+
+    // reset form + cart
     for(const k of Object.keys(placeCart)) delete placeCart[k];
     $("p_name").value = "";
     $("p_phone").value = "";
@@ -1127,24 +1083,10 @@ window.editPending = async function(orderId){
     syncPlaceDeliveryUI();
     renderPlaceCart();
     validatePlaceOrderBtn();
-
   }catch(e){
     showErr(e.message || e);
   }
 };
-
-
-function askPaymentMethod(defaultVal=""){
-  const opts = ["Cash","Moncash","Natcash","Crédit"];
-  const msg = "Méthode de paiement ?\n" + opts.map((x,i)=>`${i+1}) ${x}`).join("\n");
-  const v = prompt(msg, defaultVal ? `Ex: ${defaultVal}` : "Tape: Cash / Moncash / Natcash / Crédit");
-  const m = String(v||"").trim();
-  if(!m) return null;
-
-  // normalise
-  const found = opts.find(x=>x.toLowerCase()===m.toLowerCase());
-  return found || m; // accepte texte exact si tu préfères
-}
 
 window.finalizePending = function(orderId){
   const o = lastPendingCache.find(x=>String(x.OrderID)===String(orderId));
@@ -1158,13 +1100,12 @@ async function finalizePendingWithPay(orderId, pay){
     let ok = false;
 
     try{
-      const r = await apiJsonp("admin_finalizePendingOrder", {
-        k, orderId, paymentMethod: pay
-      });
+      const r = await apiJsonp("admin_finalizePendingOrder", { k, orderId, paymentMethod: pay });
       if(r && r.ok) ok = true;
     }catch(_e){}
 
     if(!ok){
+      // fallback minimum viable: bascule en Reçue
       await setStatus(orderId, "Reçue");
       toast("Finalisé ✅ (paiement non stocké côté serveur)");
     }else{
@@ -1173,12 +1114,14 @@ async function finalizePendingWithPay(orderId, pay){
 
     loadPendingOrders();
     loadOrders();
-
   }catch(e){
     showErr(e.message || e);
   }
 };
 
+/***************
+ * Ready actions
+ ***************/
 window.readyTakeaway = async function(order){
   try{
     const oid = String(order.OrderID||"").trim();
@@ -1187,11 +1130,8 @@ window.readyTakeaway = async function(order){
     toast("Statut mis à jour ✅");
     loadOrders();
     openWhatsAppToClient(order.Telephone, "Votre commande est prête à emporter. Merci d'avoir choisi Bes Fast Food!");
-  }catch(e){
-    showErr(e.message || e);
-  }
+  }catch(e){ showErr(e.message || e); }
 };
-
 window.readyDeliver = async function(order){
   try{
     const oid = String(order.OrderID||"").trim();
@@ -1200,9 +1140,7 @@ window.readyDeliver = async function(order){
     toast("Statut mis à jour ✅");
     loadOrders();
     openWhatsAppToClient(order.Telephone, "Votre commande est prête à livrer. Merci d'avoir choisi Bes Fast Food!");
-  }catch(e){
-    showErr(e.message || e);
-  }
+  }catch(e){ showErr(e.message || e); }
 };
 window.readyConsume = async function(order){
   try{
@@ -1212,14 +1150,19 @@ window.readyConsume = async function(order){
     toast("Statut mis à jour ✅");
     loadOrders();
     openWhatsAppToClient(order.Telephone, "Votre commande est prête à consommer. Merci d'avoir choisi Bes Fast Food!");
-  }catch(e){
-    showErr(e.message || e);
-  }
+  }catch(e){ showErr(e.message || e); }
 };
 
 /***************
  * Print POS 80mm (✅ Livraison conditionnelle)
  ***************/
+function getDeliveryFee(){
+  const isLiv = norm($("p_type").value)==="livraison";
+  if(!isLiv) return 0;
+  const z = $("p_zone").value.trim();
+  return Number(DELIVERY_FEES[z] || 0);
+}
+
 window.printPOS80 = function(order){
   try{
     const items = Array.isArray(order.items) ? order.items : [];
@@ -1250,8 +1193,8 @@ window.printPOS80 = function(order){
 @page { size: 80mm auto; margin: 6mm; }
 body{ margin:0; padding:0; }
 .sheet{
-  width: 68mm;          /* 80mm - 6mm - 6mm */
-  margin: 0 auto;  
+  width: 68mm;
+  margin: 0 auto;
   font-family: Arial, sans-serif;
   margin:0;
   color:#000;
@@ -1300,9 +1243,7 @@ td.amt{ width:28mm; text-align:right; font-weight:700; }
 </div>
 
 <div class="hr"></div>
-
 <table><tbody>${rows}</tbody></table>
-
 <div class="hr"></div>
 
 ${isLiv ? `
@@ -1328,14 +1269,13 @@ ${isLiv ? `
     w.document.open();
     w.document.write(html);
     w.document.close();
-
   }catch(e){
     showErr("Impression: " + (e.message || e));
   }
 };
 
 /***************
- * Products (liste + upsert + catégories + stock)
+ * Products
  ***************/
 let productsCache = [];
 let categoriesCache = [];
@@ -1345,7 +1285,6 @@ async function loadCategories(){
     const k = $("adminKey").value.trim();
     const r = await apiJsonp("admin_listCategories", { k });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listCategories");
-
     categoriesCache = Array.isArray(r.categories) ? r.categories : [];
     const sel = $("pf_catSelect");
     sel.innerHTML = `<option value="">(Aucune)</option>` + categoriesCache.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
@@ -1390,7 +1329,6 @@ async function loadProducts(){
     }).join("");
 
     $("productsBox").innerHTML = html;
-
   }catch(e){
     showErr(e.message || e);
     $("productsBox").textContent = "Erreur.";
@@ -1460,7 +1398,6 @@ $("saveProductBtn").addEventListener("click", async ()=>{
     toast("Produit enregistré ✅");
     await loadCategories();
     await loadProducts();
-
   }catch(e){
     showErr(e.message || e);
   }
@@ -1485,7 +1422,7 @@ $("setStockBtn").addEventListener("click", async ()=>{
 });
 
 /***************
- * Place order (submitOrderLite + getProducts)
+ * Place order
  ***************/
 let menuProducts = [];
 const placeCart = {}; // { productId: qty }
@@ -1511,7 +1448,6 @@ function calcPlaceSubtotal(){
   }
   return total;
 }
-
 function calcPlaceTotal(){
   return calcPlaceSubtotal() + getDeliveryFee();
 }
@@ -1657,177 +1593,107 @@ $("clearPlaceCartBtn").addEventListener("click", ()=>{
   renderPlaceCart();
   toast("Panier vidé ✅");
 });
+
+function buildPlacePayload_({forcePending}){
+  const items = Object.entries(placeCart).map(([ProductID, Quantite])=>({ ProductID, Quantite }));
+  if(items.length===0) throw new Error("Panier vide");
+
+  const typeCommande = $("p_type").value;
+  const isLiv = norm(typeCommande)==="livraison";
+
+  if(!$("p_name").value.trim()) throw new Error("Nom obligatoire.");
+  if(!$("p_phone").value.trim()) throw new Error("Téléphone obligatoire.");
+  if(!forcePending && !$("p_pay").value.trim()) throw new Error("Paiement obligatoire.");
+
+  if(isLiv){
+    const z = $("p_zone").value.trim();
+    const a = $("p_addr").value.trim();
+    if(!z){ $("deliveryWarn").style.display="block"; throw new Error("Zone de livraison obligatoire."); }
+    if(!a){ $("deliveryWarn").style.display="block"; throw new Error("Adresse obligatoire."); }
+  }
+
+  const fee = getDeliveryFee();
+  const sub = calcPlaceSubtotal();
+  const total = sub + fee;
+
+  const baseNote = $("p_note").value.trim();
+  const zone = $("p_zone").value.trim();
+  const deliveryNote = isLiv ? `Zone: ${zone} | Frais livraison: ${fmtHTG(fee)}` : "";
+  const noteCommande = [baseNote, deliveryNote].filter(Boolean).join(" | ");
+
+  return {
+    guestId: "admin-pos",
+    clientNom: $("p_name").value.trim(),
+    telephone: $("p_phone").value.trim(),
+    typeCommande,
+    adresse: isLiv ? `${zone} — ${$("p_addr").value.trim()}` : "",
+    noteCommande,
+    paymentMethod: $("p_pay").value.trim() || "",
+    items,
+    deliveryZone: isLiv ? zone : "",
+    deliveryFee: isLiv ? fee : 0,
+    totalOverride: total
+  };
+}
+
+function resetPlaceForm_(){
+  for(const k of Object.keys(placeCart)) delete placeCart[k];
+  $("p_note").value="";
+  $("p_addr").value="";
+  $("p_zone").value="";
+  $("p_type").value="Sur place";
+  $("p_pay").value="";
+  $("deliveryWarn").style.display="none";
+  _editingPendingId = null;
+  syncPlaceDeliveryUI();
+  renderPlaceCart();
+}
+
 $("placePendingBtn").addEventListener("click", async ()=>{
   try{
     const k = $("adminKey").value.trim();
+    const payload = buildPlacePayload_({forcePending:true});
 
-    const items = Object.entries(placeCart).map(([ProductID, Quantite])=>({ ProductID, Quantite }));
-    if(items.length===0) throw new Error("Panier vide");
-
-    const typeCommande = $("p_type").value;
-    const isLiv = norm(typeCommande)==="livraison";
-    if(!$("p_name").value.trim()) throw new Error("Nom obligatoire.");
-
-    const zone = $("p_zone").value.trim();
-    const addr = $("p_addr").value.trim();
-
-    if(isLiv && !zone) throw new Error("Zone de livraison obligatoire.");
-    if(isLiv && !addr) throw new Error("Adresse obligatoire.");
-
-    const fee = getDeliveryFee();
-    const sub = calcPlaceSubtotal();
-    const total = sub + fee;
-
-    const baseNote = $("p_note").value.trim();
-    const deliveryNote = isLiv ? `Zone: ${zone} | Frais livraison: ${fmtHTG(fee)}` : "";
-    const noteCommande = [baseNote, deliveryNote].filter(Boolean).join(" | ");
-
-    const payload = {
-      guestId: "admin-pos",
-      clientNom: $("p_name").value.trim(),
-      telephone: $("p_phone").value.trim(),
-      typeCommande,
-      adresse: isLiv ? `${zone} — ${addr}` : "",
-      noteCommande,
-      paymentMethod: $("p_pay").value.trim() || "",
-      items,
-      deliveryZone: isLiv ? zone : "",
-      deliveryFee: isLiv ? fee : 0,
-      totalOverride: total
-    };
-
-    // ✅ 1) Crée la nouvelle commande en attente (UNE SEULE FOIS)
+    // 1) crée la nouvelle commande en attente
     const r = await apiJsonp("admin_createPendingOrder", { k, payload: JSON.stringify(payload) });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_createPendingOrder");
 
-    // ✅ 2) Si on modifiait une ancienne commande, on annule l’ancienne APRÈS succès
+    // 2) si on modifiait une ancienne en attente: annule l’ancienne après succès
     if(_editingPendingId){
       await setStatus(_editingPendingId, "Annulée");
     }
-    _editingPendingId = null;
 
-    // ✅ 3) UI refresh (UNE SEULE FOIS)
     toast("Commande mise en attente ✅ ID: " + (r.orderId || "OK"));
     loadPendingOrders();
     switchTab("pending");
 
-    // reset panier / champs
-    for(const k2 of Object.keys(placeCart)) delete placeCart[k2];
-    $("p_note").value="";
-    $("p_addr").value="";
-    $("p_zone").value="";
-    $("p_type").value="Sur place";
-    $("p_pay").value="";
-    $("deliveryWarn").style.display="none";
-
-    syncPlaceDeliveryUI();
-    renderPlaceCart();
-
+    resetPlaceForm_();
     loadMenuForPlace();
     loadOrders();
-
   }catch(e){
     showErr(e.message || e);
   }
 });
 
-
 $("placeOrderBtn").addEventListener("click", async ()=>{
   try{
-    const items = Object.entries(placeCart).map(([ProductID, Quantite])=>({ ProductID, Quantite }));
-    if(items.length===0) throw new Error("Panier vide");
-
-    const typeCommande = $("p_type").value;
-    const isLiv = norm(typeCommande)==="livraison";
-
-    if(isLiv){
-      const z = $("p_zone").value.trim();
-      if(!z){
-        $("deliveryWarn").style.display = "block";
-        throw new Error("Zone de livraison obligatoire.");
-      }
-      const addr = $("p_addr").value.trim();
-      if(!addr){
-        $("deliveryWarn").style.display = "block";
-        throw new Error("Adresse obligatoire.");
-      }
-    }
-
-    const fee = getDeliveryFee();
-    const sub = calcPlaceSubtotal();
-    const total = sub + fee;
-
-    const baseNote = $("p_note").value.trim();
-    const zone = $("p_zone").value.trim();
-    const deliveryNote = isLiv ? `Zone: ${zone} | Frais livraison: ${fmtHTG(fee)}` : "";
-    const noteCommande = [baseNote, deliveryNote].filter(Boolean).join(" | ");
-
-    const payload = {
-      guestId: "admin-pos",
-      clientNom: $("p_name").value.trim(),
-      telephone: $("p_phone").value.trim(),
-      typeCommande,
-      adresse: isLiv ? `${zone} — ${$("p_addr").value.trim()}` : "",
-      noteCommande,
-      paymentMethod: $("p_pay").value.trim(),
-      items,
-      deliveryZone: isLiv ? zone : "",
-      deliveryFee: isLiv ? fee : 0,
-      totalOverride: total
-    };
-
+    const payload = buildPlacePayload_({forcePending:false});
     const r = await apiJsonp("submitOrderLite", { payload: JSON.stringify(payload) });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur submitOrderLite");
 
     toast("Commande enregistrée ✅ ID: " + (r.orderId || "OK"));
-
-    for(const k of Object.keys(placeCart)) delete placeCart[k];
-    $("p_note").value="";
-    $("p_addr").value="";
-    $("p_zone").value="";
-    $("p_type").value="Sur place";
-    $("p_pay").value="";
-    $("deliveryWarn").style.display="none";
-
-    syncPlaceDeliveryUI();
-    renderPlaceCart();
-
+    resetPlaceForm_();
     loadMenuForPlace();
     loadOrders();
-
   }catch(e){
     showErr(e.message || e);
   }
 });
 
-/***************
- * Boot
- ***************/
-(function(){
-  const k = getAdminKey();
-  $("adminKey").value = k;
-  setAdminKey(k);
-
-  $("adminKey").addEventListener("input", ()=>{
-    setAdminKey($("adminKey").value.trim());
-  });
-
-  syncPlaceDeliveryUI();
-  loadOrders();
-  })(); // fin Boot
-
 /****************
- * Close Day
+ * Close Day (Preview + Validate)
  ****************/
 let _cd_lastPreview = null;
-
-
-function todayISO(){
-  const d = new Date();
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
 
 function initCloseDayUI(){
   if(!$("cd_start").value) $("cd_start").value = todayISO();
@@ -1835,39 +1701,22 @@ function initCloseDayUI(){
   if($("cd_opening").value==="") $("cd_opening").value = "0";
   $("cd_validateBtn").disabled = true;
   $("cd_pdfBox").style.display="none";
-  if($("cd_blockMsg")) $("cd_blockMsg").style.display="none";
+  $("cd_blockMsg").style.display="none";
+  $("cd_summary").innerHTML = "Aucun preview.";
+  $("cd_prodTbody").innerHTML = `<tr><td colspan="3" class="muted">—</td></tr>`;
+  _cd_lastPreview = null;
 }
 
-  function normStatus2(s){
-  return String(s||"").toLowerCase().trim();
+function isExcludedFromSales_(o){
+  const st = norm(o?.Statut || o?.status);
+  if(st.includes("annul")) return true;
+  if(st.includes("en attente") || st.includes("attente")) return true;
+  return false;
 }
-
-// DateHeure peut être ISO "2026-01-28T01:45:29.770Z" ou texte.
-// On retourne un timestamp ms fiable.
-function parseOrderDateMs(o){
-  const raw = o?.DateHeure || o?.Date || o?.createdAt || o?.CreatedAt || "";
-  if(!raw) return NaN;
-
-  // ISO Z
-  const t1 = Date.parse(raw);
-  if(!Number.isNaN(t1)) return t1;
-
-  // fallback: tente "YYYY-MM-DD HH:mm:ss"
-  const s = String(raw).replace(" ", "T");
-  const t2 = Date.parse(s);
-  return t2;
+function isDelivered_(o){
+  const st = norm(o?.Statut || o?.status);
+  return st.includes("livr");
 }
-
-// startDate/endDate sont des <input type="date"> => "YYYY-MM-DD"
-// Inclusif sur la fin de journée.
-function inDateRangeMs(t, startDate, endDate){
-  if(!Number.isFinite(t)) return false;
-
-  const s = new Date(startDate + "T00:00:00");
-  const e = new Date(endDate   + "T23:59:59.999");
-  return t >= s.getTime() && t <= e.getTime();
-}
-
 
 async function closeDayPreview(){
   try{
@@ -1876,29 +1725,28 @@ async function closeDayPreview(){
     const endDate   = $("cd_end").value.trim()   || startDate;
     const openingCash = Number($("cd_opening").value || 0);
 
-    // 1) On récupère TOUTES les commandes (pas de filtre status)
+    // 1) tout récupérer (cohérent avec validation)
     const r = await apiJsonp("admin_listOrders", { k, limit:"500", status:"" });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listOrders");
-
     const all = Array.isArray(r.orders) ? r.orders : [];
 
-    // 2) Filtrage par range de dates sélectionnées
+    // 2) filtre dates
     const inRange = all.filter(o=>{
       const t = parseOrderDateMs(o);
       return inDateRangeMs(t, startDate, endDate);
     });
 
-    // 3) Exclure Annulée + En attente des ventes
-    const sold = inRange.filter(o=>{
-      const st = normStatus2(o.Statut || o.status);
-      if(st.includes("annul")) return false;
-      if(st.includes("en attente") || st.includes("attente")) return false;
-      return true;
-    });
+    // 3) ventes = inRange - (Annulée + En attente)
+    const sold = inRange.filter(o=>!isExcludedFromSales_(o));
 
-    // 4) Recalcul totals / paiement / produits
-    const byPayment = { Cash:0, Moncash:0, Natcash:0, "Crédit":0,};
+    // 4) blocage: si une commande dans la période n'est pas Livré (en excluant annulée / attente)
+    const notDelivered = sold.filter(o=>!isDelivered_(o));
+    const undeliveredCount = notDelivered.length;
+
+    // 5) totaux paiements + totaux produits + frais livraison
+    const byPayment = { Cash:0, Moncash:0, Natcash:0, "Crédit":0 };
     let grandTotal = 0;
+    let totalDeliveryFees = 0;
 
     // map produit -> {name, qty, amount}
     const prodMap = new Map();
@@ -1907,23 +1755,17 @@ async function closeDayPreview(){
       const total = Number(o.Total || 0);
       grandTotal += total;
 
+      totalDeliveryFees += Number(o.DeliveryFee || 0);
+
       const pm = String(o.PaymentMethod || o.Paiement || o.ModePaiement || "").trim();
+      const pmN = norm(pm);
       const key =
-        pm.toLowerCase()==="cash" ? "Cash" :
-        pm.toLowerCase()==="moncash" ? "Moncash" :
-        pm.toLowerCase()==="natcash" ? "Natcash" :
-        (pm.toLowerCase()==="credit" || pm.toLowerCase()==="crédit") ? "Crédit" :
+        pmN==="cash" ? "Cash" :
+        pmN==="moncash" ? "Moncash" :
+        pmN==="natcash" ? "Natcash" :
+        (pmN==="credit" || pmN==="crédit") ? "Crédit" :
         null;
-let totalDeliveryFees = 0;
 
-for(const o of sold){
-  const deliveryFee = Number(o.DeliveryFee || 0);
-  totalDeliveryFees += deliveryFee;
-
-  // ... ton code items
-}
-
-      
       if(key) byPayment[key] = Number(byPayment[key]||0) + total;
 
       const items = Array.isArray(o.items) ? o.items : [];
@@ -1942,95 +1784,86 @@ for(const o of sold){
     const byProduct = Array.from(prodMap.values())
       .sort((a,b)=> Number(b.amount||0) - Number(a.amount||0));
 
-    // 5) commandes non livrées (dans la période)
-    const undeliveredCount = inRange.filter(o=>{
-      const st = normStatus2(o.Statut || o.status);
-      if(st.includes("annul")) return false;
-      if(st.includes("en attente") || st.includes("attente")) return false;
-      return !st.includes("livr"); // tout ce qui n’est pas "livr" = non livré
-    }).length;
+    const itemsTotal = byProduct.reduce((acc,x)=>acc + Number(x.amount||0), 0);
+    const totalProductsPlusFees = itemsTotal + totalDeliveryFees;
 
     const accountingCash = openingCash + Number(byPayment.Cash || 0);
 
-    // 6) On fabrique un objet preview compatible avec renderCloseDayPreview()
-    const pv = {
-      ok: true,
-      date: (startDate === endDate) ? startDate : `${startDate} → ${endDate}`,
+    _cd_lastPreview = {
+      startDate, endDate,
+      dateLabel: (startDate===endDate) ? startDate : `${startDate} → ${endDate}`,
       ordersCount: sold.length,
       undeliveredCount,
+      undeliveredIds: notDelivered.map(o=>String(o.OrderID||"").trim()).filter(Boolean),
       totals: {
         openingCash,
         byPayment,
         grandTotal,
+        totalDeliveryFees,
+        itemsTotal,
+        totalProductsPlusFees,
         accountingCash
-        totalDeliveryFees
       },
-      byProduct,
-      // utile si tu veux debug/afficher la liste
-      orders: inRange
+      byProduct
     };
 
-    _cd_lastPreview = pv;
-    renderCloseDayPreview(pv);
+    renderCloseDayPreview(_cd_lastPreview);
 
-    // blocage si non livrées
     $("cd_blockMsg").style.display = undeliveredCount > 0 ? "inline" : "none";
-    $("cd_validateBtn").disabled = undeliveredCount > 0;
+    $("cd_validateBtn").disabled = undeliveredCount > 0 || sold.length===0;
 
-    toast("Preview (dates) généré ✅");
-
+    if(undeliveredCount>0){
+      toast("Preview généré (validation BLOQUÉE) ⚠️");
+    }else{
+      toast("Preview généré ✅");
+    }
   }catch(e){
     showErr(e.message || e);
   }
 }
 
-
-
 function renderCloseDayPreview(pv){
   const und = Number(pv.undeliveredCount || 0);
-
   const undMsg = und > 0
-    ? `<div style="
-        margin-bottom:10px;
-        padding:10px 12px;
-        border-radius:12px;
-        border:1px solid rgba(255,193,7,.30);
-        background: rgba(255,193,7,.12);
-        font-weight:900
-      ">
-        ${und} commande${und>1?'s':''} ne ${und>1?'sont':'est'} pas livrée${und>1?'s':''}.
-      </div>`
+    ? `<div style="margin-bottom:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,193,7,.30);background: rgba(255,193,7,.12);font-weight:900">
+         ${und} commande${und>1?'s':''} dans la période ${und>1?'ne sont':'n’est'} pas <b>Livré</b>. Validation bloquée.
+         ${pv.undeliveredIds?.length ? `<div class="muted small" style="margin-top:6px">IDs: ${escapeHtml(pv.undeliveredIds.join(", "))}</div>` : ``}
+       </div>`
     : "";
+
   const t = pv.totals || {};
   const pay = (t.byPayment || {});
+
   const lines = [
-    `<b>Date:</b> ${escapeHtml(pv.date || "")}`,
+    `<b>Période:</b> ${escapeHtml(pv.dateLabel || "")}`,
     `<b>Nb ventes:</b> ${Number(pv.ordersCount||0)}`,
     `<b>Ventes paiement:</b>`,
     `Cash: <b>${fmtHTG(pay.Cash||0)}</b> • Crédit: <b>${fmtHTG(pay["Crédit"]||0)}</b>`,
     `Moncash: <b>${fmtHTG(pay.Moncash||0)}</b> • Natcash: <b>${fmtHTG(pay.Natcash||0)}</b>`,
+    `<b>Frais livraison:</b> <b>${fmtHTG(t.totalDeliveryFees||0)}</b>`,
     `<b>TOTAL:</b> <b>${fmtHTG(t.grandTotal||0)}</b>`,
     `<hr class="hr">`,
     `Encaisse début: <b>${fmtHTG(t.openingCash||0)}</b>`,
     `Ventes Cash: <b>${fmtHTG(pay.Cash||0)}</b>`,
     `<b>Encaisse comptable:</b> <b>${fmtHTG(t.accountingCash||0)}</b>`
   ];
+
   $("cd_summary").innerHTML = undMsg + lines.join("<br>");
-  lines.splice(6, 0, `Frais livraison: <b>${fmtHTG(t.totalDeliveryFees||0)}</b>`);
 
-  // ✅ ajoute les frais livraison (si dispo)
-const feeLine = Number(pv?.totals?.totalDeliveryFees || 0);
+  // table produits + frais livraison + total
+  const list = Array.isArray(pv.byProduct) ? pv.byProduct : [];
+  const feeLine = Number(t.totalDeliveryFees || 0);
+  const itemsTotal = Number(t.itemsTotal || 0);
+  const totalProductsPlusFees = Number(t.totalProductsPlusFees || 0);
 
-let rowsHtml = list.map(x=>`
-  <tr>
-    <td>${escapeHtml(x.name||"")}</td>
-    <td>${Number(x.qty||0)}</td>
-    <td><b>${fmtHTG(x.amount||0)}</b></td>
-  </tr>
-`).join("");
+  let rowsHtml = list.map(x=>`
+    <tr>
+      <td>${escapeHtml(x.name||"")}</td>
+      <td>${Number(x.qty||0)}</td>
+      <td><b>${fmtHTG(x.amount||0)}</b></td>
+    </tr>
+  `).join("");
 
-// ✅ ligne frais livraison
-if(feeLine > 0){
   rowsHtml += `
     <tr>
       <td><b>Frais livraison</b></td>
@@ -2038,39 +1871,42 @@ if(feeLine > 0){
       <td><b>${fmtHTG(feeLine)}</b></td>
     </tr>
   `;
-}
 
-$("cd_prodTbody").innerHTML = (list.length || feeLine > 0)
-  ? rowsHtml + `
+  rowsHtml += `
     <tr>
-      <td colspan="2"><b>TOTAL PRODUITS</b></td>
-      <td><b>${fmtHTG(itemsTotalLocal + feeLine)}</b></td>
+      <td colspan="2"><b>TOTAL PRODUITS + frais</b></td>
+      <td><b>${fmtHTG(totalProductsPlusFees)}</b></td>
     </tr>
-  `
-  : `<tr><td colspan="3" class="muted">Aucun</td></tr>`;
+    <tr>
+      <td colspan="2" class="muted small">Info</td>
+      <td class="muted small">Total produits: ${fmtHTG(itemsTotal)}</td>
+    </tr>
+  `;
+
+  $("cd_prodTbody").innerHTML = (list.length || feeLine>0)
+    ? rowsHtml
+    : `<tr><td colspan="3" class="muted">Aucun</td></tr>`;
+}
 
 async function validateCloseDay(){
   try{
-    const k = $("adminKey").value.trim();                 // ✅ défini
+    const k = $("adminKey").value.trim();
     const startDate = $("cd_start").value.trim() || todayISO();
     const endDate   = $("cd_end").value.trim()   || startDate;
-    const openingCash = $("cd_opening").value;            // ✅ défini
+    const openingCash = String($("cd_opening").value || 0);
 
-    // ✅ sécurité : si preview indique non livrées => bloquer
+    // sécurité: preview obligatoire + cohérence dates + blocage si non livré
+    if(!_cd_lastPreview || _cd_lastPreview.startDate!==startDate || _cd_lastPreview.endDate!==endDate){
+      throw new Error("Fais d'abord Preview (dates) avant Valider.");
+    }
     const und = Number(_cd_lastPreview?.undeliveredCount || 0);
     if(und > 0){
       $("cd_blockMsg").style.display = "inline";
       $("cd_validateBtn").disabled = true;
-      throw new Error("Impossible de valider : commande(s) non livrée(s).");
+      throw new Error("Impossible de valider : commande(s) non livrée(s) dans la période.");
     }
 
-    const r = await apiJsonp("admin_validateCloseDay", {
-      k,
-      startDate,
-      endDate,
-      openingCash: String(openingCash || 0)
-    });
-
+    const r = await apiJsonp("admin_validateCloseDay", { k, startDate, endDate, openingCash });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_validateCloseDay");
 
     toast("Clôture validée ✅ (PDF + historique)");
@@ -2078,10 +1914,12 @@ async function validateCloseDay(){
 
     if(r.pdfUrl){
       $("cd_pdfBox").style.display="block";
-      $("cd_pdfBox").innerHTML = `PDF prêt: <a href="${r.pdfUrl}" target="_blank"><b>Ouvrir / Imprimer</b></a>`;
+      $("cd_pdfBox").innerHTML = `PDF prêt: <a href="${r.pdfUrl}" target="_blank" rel="noopener"><b>Ouvrir / Imprimer</b></a>`;
     }
 
+    // ✅ Objectif #5: après clôture validée, rafraîchir historique transactions
     loadOrders();
+    loadTxHistory();
   }catch(e){
     showErr(e.message || e);
   }
@@ -2089,30 +1927,34 @@ async function validateCloseDay(){
 
 $("cd_previewBtn").addEventListener("click", closeDayPreview);
 $("cd_validateBtn").addEventListener("click", validateCloseDay);
+
+/****************
+ * Historique transactions
+ ****************/
 async function loadTxHistory(){
   try{
     const k = $("adminKey").value.trim();
-   const startDate = $("ht_start").value.trim();
-  const endDate = $("ht_end").value.trim();
+    const startDate = $("ht_start").value.trim();
+    const endDate = $("ht_end").value.trim();
     const q = $("ht_q").value.trim();
 
-   const r = await apiJsonp("admin_listTransactionsHistory", {
-  k, startDate, endDate, q, limit:"200"
-});
-
+    const r = await apiJsonp("admin_listTransactionsHistory", { k, startDate, endDate, q, limit:"200" });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listTransactionsHistory");
 
     const list = Array.isArray(r.orders) ? r.orders : [];
     list.sort((a,b)=>{
-  const da = new Date(a.DateHeure || a.Date || 0).getTime();
-  const db = new Date(b.DateHeure || b.Date || 0).getTime();
-  return db - da; // plus récent d’abord
-  });
+      const da = parseOrderDateMs(a);
+      const db = parseOrderDateMs(b);
+      return (db||0) - (da||0);
+    });
+
     $("ht_tbody").innerHTML = list.length ? list.map(o=>{
       const st = String(o.Statut||"-");
+      const dRaw = String(o.DateHeure || o.Date || "");
+      const dateShort = dRaw ? dRaw.slice(0,10) : "";
       return `
         <tr>
-          <td>${escapeHtml(String(o.Date||"").slice(0,10) || String(o.DateHeure||""))}</td>
+          <td>${escapeHtml(dateShort || dRaw || "")}</td>
           <td class="idCell" title="${escapeHtml(o.OrderID||"")}">${escapeHtml(o.OrderID||"")}</td>
           <td><b>${escapeHtml(o.ClientNom||"")}</b><div class="muted">${escapeHtml(o.Telephone||"")}</div></td>
           <td>${escapeHtml(o.PaymentMethod||"")}</td>
@@ -2127,21 +1969,24 @@ async function loadTxHistory(){
 }
 $("ht_loadBtn").addEventListener("click", loadTxHistory);
 
+/****************
+ * Historique rapports
+ ****************/
 async function loadReportsHistory(){
   try{
     const k = $("adminKey").value.trim();
     const startDate = $("hr_start").value.trim();
     const endDate = $("hr_end").value.trim();
-   const r = await apiJsonp("admin_listReportsHistory", { k, startDate, endDate, limit:"120" });
-
+    const r = await apiJsonp("admin_listReportsHistory", { k, startDate, endDate, limit:"120" });
     if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listReportsHistory");
 
     const list = Array.isArray(r.reports) ? r.reports : [];
     list.sort((a,b)=>{
-  const da = new Date(a.Date || a.CreatedAt || 0).getTime();
-  const db = new Date(b.Date || b.CreatedAt || 0).getTime();
-  return db - da; // plus récent d’abord
-  });
+      const da = Date.parse(String(a.Date || a.CreatedAt || "")) || 0;
+      const db = Date.parse(String(b.Date || b.CreatedAt || "")) || 0;
+      return db - da;
+    });
+
     $("hr_tbody").innerHTML = list.length ? list.map(x=>{
       const pdf = String(x.PdfUrl||"").trim();
       const created = String(x.CreatedAt||"");
@@ -2152,21 +1997,34 @@ async function loadReportsHistory(){
           <td>${fmtHTG(x.OpeningCash||0)}</td>
           <td><b>${fmtHTG(x.AccountingCash||0)}</b></td>
           <td><b>${fmtHTG(x.GrandTotal||0)}</b></td>
-          <td>${pdf ? `<a href="${pdf}" target="_blank"><b>Ouvrir</b></a>` : `<span class="muted">—</span>`}</td>
+          <td>${pdf ? `<a href="${pdf}" target="_blank" rel="noopener"><b>Ouvrir</b></a>` : `<span class="muted">—</span>`}</td>
         </tr>
       `;
     }).join("") : `<tr><td colspan="6" class="muted">Aucun rapport.</td></tr>`;
-
   }catch(e){
     showErr(e.message || e);
   }
 }
 $("hr_loadBtn").addEventListener("click", loadReportsHistory);
 
-  
+/***************
+ * Boot
+ ***************/
+(function(){
+  const k = getAdminKey();
+  $("adminKey").value = k;
+  setAdminKey(k);
+
+  $("adminKey").addEventListener("input", ()=>{
+    setAdminKey($("adminKey").value.trim());
+  });
+
+  syncPlaceDeliveryUI();
+  loadOrders();
+})();
 </script>
 
- <!-- ✅ Modal choix paiement (Finaliser) -->
+<!-- ✅ Modal choix paiement (Finaliser) -->
 <div id="payModal" style="
   position:fixed; inset:0; display:none; z-index:9999;
   background:rgba(0,0,0,.6); backdrop-filter: blur(6px);
@@ -2188,12 +2046,13 @@ $("hr_loadBtn").addEventListener("click", loadReportsHistory);
     </select>
 
     <div class="row" style="justify-content:flex-end;margin-top:14px">
-      <button class="btn" onclick="closePayModal()">Annuler</button>
-      <button class="btn good" onclick="confirmPayModal()">Valider</button>
+      <button class="btn" type="button" onclick="closePayModal()">Annuler</button>
+      <button class="btn good" type="button" onclick="confirmPayModal()">Valider</button>
     </div>
   </div>
 </div>
-  
- </body>
+
+</body>
 </html>
+
 
