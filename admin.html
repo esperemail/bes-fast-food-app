@@ -1809,56 +1809,109 @@ function initCloseDayUI(){
 
 async function closeDayPreview(){
   try{
-    const k = $("adminKey").value.trim();                 // ✅ défini
+    const k = $("adminKey").value.trim();
     const startDate = $("cd_start").value.trim() || todayISO();
     const endDate   = $("cd_end").value.trim()   || startDate;
-    const openingCash = $("cd_opening").value;            // ✅ défini
+    const openingCash = Number($("cd_opening").value || 0);
 
-    const r = await apiJsonp("admin_closeDayPreview", {
-      k,
-      startDate,
-      endDate,
-      openingCash: String(openingCash || 0)
+    // 1) On récupère TOUTES les commandes (pas de filtre status)
+    const r = await apiJsonp("admin_listOrders", { k, limit:"500", status:"" });
+    if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_listOrders");
+
+    const all = Array.isArray(r.orders) ? r.orders : [];
+
+    // 2) Filtrage par range de dates sélectionnées
+    const inRange = all.filter(o=>{
+      const t = parseOrderDateMs(o);
+      return inDateRangeMs(t, startDate, endDate);
     });
 
-    if(!r || !r.ok) throw new Error(r?.error || "Erreur admin_closeDayPreview");
+    // 3) Exclure Annulée + En attente des ventes
+    const sold = inRange.filter(o=>{
+      const st = normStatus2(o.Statut || o.status);
+      if(st.includes("annul")) return false;
+      if(st.includes("en attente") || st.includes("attente")) return false;
+      return true;
+    });
 
-    _cd_lastPreview = r;
-    renderCloseDayPreview(r);
+    // 4) Recalcul totals / paiement / produits
+    const byPayment = { Cash:0, Moncash:0, Natcash:0, "Crédit":0, Natcash:0 };
+    let grandTotal = 0;
 
-    // ✅ blocage si non livrées
-   // ✅ blocage si non livrées (avec fallback local)
-let und = Number(r.undeliveredCount || 0);
+    // map produit -> {name, qty, amount}
+    const prodMap = new Map();
 
-// Fallback si le backend renvoie la liste des commandes
-const list = Array.isArray(r.orders) ? r.orders
-  : (Array.isArray(r.openOrders) ? r.openOrders : null);
+    for(const o of sold){
+      const total = Number(o.Total || 0);
+      grandTotal += total;
 
-function normStatus(s){
-  s = String(s||"").trim().toLowerCase();
-  try{
-    s = s.normalize("NFD").replace(/[\u0300-\u036f]/g,""); // enlève accents
-  }catch(_e){}
-  return s;
-}
+      const pm = String(o.PaymentMethod || o.Paiement || o.ModePaiement || "").trim();
+      const key =
+        pm.toLowerCase()==="cash" ? "Cash" :
+        pm.toLowerCase()==="moncash" ? "Moncash" :
+        pm.toLowerCase()==="natcash" ? "Natcash" :
+        (pm.toLowerCase()==="credit" || pm.toLowerCase()==="crédit") ? "Crédit" :
+        null;
 
-if(list){
-  und = list.filter(o=>{
-    const st = normStatus(o.Statut || o.status);
-    if(!st) return false;
-    if(st.includes("annul")) return false;
-    if(st.includes("attente")) return false;
-    return !st.includes("livr");
-  }).length;
-}
+      if(key) byPayment[key] = Number(byPayment[key]||0) + total;
 
-$("cd_blockMsg").style.display = und > 0 ? "inline" : "none";
-$("cd_validateBtn").disabled = und > 0;
-    toast("Preview généré ✅");
+      const items = Array.isArray(o.items) ? o.items : [];
+      for(const it of items){
+        const name = String(it.Nom || it.name || "").trim() || "Produit";
+        const qty = Number(it.Quantite || it.qty || 0);
+        const amt = Number(it.SousTotal || it.amount || 0) || (Number(it.Prix||0) * qty);
+
+        const prev = prodMap.get(name) || { name, qty:0, amount:0 };
+        prev.qty += qty;
+        prev.amount += amt;
+        prodMap.set(name, prev);
+      }
+    }
+
+    const byProduct = Array.from(prodMap.values())
+      .sort((a,b)=> Number(b.amount||0) - Number(a.amount||0));
+
+    // 5) commandes non livrées (dans la période)
+    const undeliveredCount = inRange.filter(o=>{
+      const st = normStatus2(o.Statut || o.status);
+      if(st.includes("annul")) return false;
+      if(st.includes("en attente") || st.includes("attente")) return false;
+      return !st.includes("livr"); // tout ce qui n’est pas "livr" = non livré
+    }).length;
+
+    const accountingCash = openingCash + Number(byPayment.Cash || 0);
+
+    // 6) On fabrique un objet preview compatible avec renderCloseDayPreview()
+    const pv = {
+      ok: true,
+      date: (startDate === endDate) ? startDate : `${startDate} → ${endDate}`,
+      ordersCount: sold.length,
+      undeliveredCount,
+      totals: {
+        openingCash,
+        byPayment,
+        grandTotal,
+        accountingCash
+      },
+      byProduct,
+      // utile si tu veux debug/afficher la liste
+      orders: inRange
+    };
+
+    _cd_lastPreview = pv;
+    renderCloseDayPreview(pv);
+
+    // blocage si non livrées
+    $("cd_blockMsg").style.display = undeliveredCount > 0 ? "inline" : "none";
+    $("cd_validateBtn").disabled = undeliveredCount > 0;
+
+    toast("Preview (dates) généré ✅");
+
   }catch(e){
     showErr(e.message || e);
   }
 }
+
 
 
 function renderCloseDayPreview(pv){
@@ -1890,7 +1943,7 @@ function renderCloseDayPreview(pv){
     `Ventes Cash: <b>${fmtHTG(pay.Cash||0)}</b>`,
     `<b>Encaisse comptable:</b> <b>${fmtHTG(t.accountingCash||0)}</b>`
   ];
-  $("cd_summary").innerHTML = lines.join("<br>");
+  $("cd_summary").innerHTML = undMsg + lines.join("<br>");
 
   const list = Array.isArray(pv.byProduct) ? pv.byProduct : [];
   const itemsTotalLocal = list.reduce((s,x)=> s + Number(x.amount||0), 0);
